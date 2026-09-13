@@ -1,5 +1,6 @@
 export type AppTheme = 'light' | 'dark';
-export type AppFontSize = 'small' | 'medium' | 'large';
+
+export type FontSize = 'small' | 'medium' | 'large';
 
 export type TabType = 'learn' | 'practice' | 'leaderboard' | 'profile' | 'curriculum';
 
@@ -59,6 +60,10 @@ export interface LessonMeta {
   description: string;
   questionsCount: number;
   isBoss?: boolean;
+  /** Key into AVAILABLE_FIVE_STAGE_LESSONS, once this lesson's real 6-stage
+   * content has been authored. Undefined means only the placeholder title
+   * exists so far -- see lessonStagesData.ts. */
+  fiveStageLessonKey?: string;
 }
 
 export interface WorldMeta {
@@ -68,10 +73,6 @@ export interface WorldMeta {
   badge: string;
   color: string;
   order: number;
-  level: CurriculumLevel;
-  levelTitle: string; // e.g. 'Beginner', 'Intermediate', 'Experienced'
-  bossTitle?: string;
-  bossDescription?: string;
   lessons: LessonMeta[];
 }
 

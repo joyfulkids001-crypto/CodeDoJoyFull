@@ -1,10 +1,9 @@
-import { AppTheme, AppFontSize, UserStats, UserMistake } from '../types';
+import { AppTheme, FontSize, UserStats, UserMistake } from '../types';
 
 const STATS_KEY = 'codedo_user_stats';
 const THEME_KEY = 'codedo_app_theme';
-const FONT_SIZE_KEY = 'codedo_font_size';
 const SOUND_KEY = 'codedo_sound_enabled';
-const TAP_TO_REVEAL_KEY = 'codedo_tap_to_reveal_enabled';
+const FONT_SIZE_KEY = 'codedo_font_size';
 const MISTAKES_KEY = 'codedo_user_mistakes';
 const LAST_ACTIVE_DATE_KEY = 'codedo_last_active_date';
 
@@ -49,24 +48,6 @@ export const StorageManager = {
     }
   },
 
-  getFontSize(): AppFontSize {
-    try {
-      const saved = localStorage.getItem(FONT_SIZE_KEY);
-      if (saved === 'small' || saved === 'medium' || saved === 'large') return saved;
-    } catch {
-      // ignore
-    }
-    return 'medium';
-  },
-
-  setFontSize(size: AppFontSize): void {
-    try {
-      localStorage.setItem(FONT_SIZE_KEY, size);
-    } catch {
-      // ignore
-    }
-  },
-
   getSoundEnabled(): boolean {
     try {
       const saved = localStorage.getItem(SOUND_KEY);
@@ -85,19 +66,19 @@ export const StorageManager = {
     }
   },
 
-  getTapToRevealEnabled(): boolean {
+  getFontSize(): FontSize {
     try {
-      const saved = localStorage.getItem(TAP_TO_REVEAL_KEY);
-      if (saved !== null) return saved === 'true';
+      const saved = localStorage.getItem(FONT_SIZE_KEY);
+      if (saved === 'small' || saved === 'medium' || saved === 'large') return saved;
     } catch {
       // ignore
     }
-    return true;
+    return 'medium';
   },
 
-  setTapToRevealEnabled(enabled: boolean): void {
+  setFontSize(fontSize: FontSize): void {
     try {
-      localStorage.setItem(TAP_TO_REVEAL_KEY, String(enabled));
+      localStorage.setItem(FONT_SIZE_KEY, fontSize);
     } catch {
       // ignore
     }

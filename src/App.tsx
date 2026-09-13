@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
-import { AppTheme, AppFontSize, LessonQuestion, TabType, UserStats } from './types';
+import React, { useState, useEffect, useRef } from 'react';
+import { App as CapacitorApp } from '@capacitor/app';
+import { AppTheme, FontSize, LessonQuestion, TabType, UserStats } from './types';
 import {
   ALL_CURRICULUM_QUESTIONS,
   DAILY_BATTLE_POOL,
@@ -18,28 +19,28 @@ import { soundFX } from './utils/audio';
 import { StorageManager, DEFAULT_USER_STATS } from './utils/storage';
 import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
-import { LearnView } from './components/LearnView';
-import { CurriculumExplorer } from './components/CurriculumExplorer';
+import { Home } from './components/Home';
+import { Listing } from './components/Listing';
 import { ActiveLessonView } from './components/ActiveLessonView';
 import { PracticeView, DrillType } from './components/PracticeView';
 import { LeaderboardView } from './components/LeaderboardView';
 import { ProfileView } from './components/ProfileView';
-import { FiveStageLessonRunner } from './components/FiveStageLessonRunner';
+import { Detail, DetailHandle } from './components/Detail';
 
 export default function App() {
   const [theme, setTheme] = useState<AppTheme>(() => StorageManager.getTheme());
-  const [fontSize, setFontSize] = useState<AppFontSize>(() => StorageManager.getFontSize());
   const [activeTab, setActiveTab] = useState<TabType>('learn');
   const [isLessonActive, setIsLessonActive] = useState<boolean>(false);
   const [fiveStageLessonKey, setFiveStageLessonKey] = useState<string | null>(null);
   const [activeQuestionPool, setActiveQuestionPool] = useState<LessonQuestion[]>(LESSON_QUESTIONS);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(1); // Question 2 (Step 2 of 5: val x = 10, val y = 20)
   const [soundEnabled, setSoundEnabled] = useState<boolean>(() => StorageManager.getSoundEnabled());
-  const [tapToRevealEnabled, setTapToRevealEnabled] = useState<boolean>(() => StorageManager.getTapToRevealEnabled());
+  const [fontSize, setFontSize] = useState<FontSize>(() => StorageManager.getFontSize());
 
   // User Stats loaded from storage with daily reset check
   const [userStats, setUserStats] = useState<UserStats>(() => StorageManager.getUserStats());
   const [curriculumWorldId, setCurriculumWorldId] = useState<string>('world-1');
+  const detailRef = useRef<DetailHandle>(null);
 
   // Open Curriculum Map with optional target world
   const handleOpenCurriculum = (worldId?: string) => {
@@ -65,18 +66,11 @@ export default function App() {
     StorageManager.setTheme(theme);
   }, [theme]);
 
-  // Sync font size class and data-attribute on root element for app-wide font scaling
+  // Persist font-size preference; applied via className on <main> only, so
+  // the Header toolbar and bottom Navigation tabs are never affected.
   useEffect(() => {
-    document.documentElement.classList.remove('font-size-small', 'font-size-medium', 'font-size-large');
-    document.documentElement.classList.add(`font-size-${fontSize}`);
-    document.documentElement.setAttribute('data-font-size', fontSize);
     StorageManager.setFontSize(fontSize);
   }, [fontSize]);
-
-  const handleSetFontSize = (newSize: AppFontSize) => {
-    setFontSize(newSize);
-    StorageManager.setFontSize(newSize);
-  };
 
   const toggleTheme = () => {
     setTheme((prev) => {
@@ -86,19 +80,16 @@ export default function App() {
     });
   };
 
+  const changeFontSize = (next: FontSize) => {
+    setFontSize(next);
+    StorageManager.setFontSize(next);
+  };
+
   const toggleSound = () => {
     setSoundEnabled((prev) => {
       const next = !prev;
       soundFX.enabled = next;
       StorageManager.setSoundEnabled(next);
-      return next;
-    });
-  };
-
-  const toggleTapToReveal = () => {
-    setTapToRevealEnabled((prev) => {
-      const next = !prev;
-      StorageManager.setTapToRevealEnabled(next);
       return next;
     });
   };
@@ -161,6 +152,32 @@ export default function App() {
     setIsLessonActive(false);
   };
 
+  // Make every screen respect the Android hardware back button instead of the
+  // default (exit the app from wherever it's pressed): step back through the
+  // lesson stages, close an active drill, or return to the Learn tab -- only
+  // exiting the app once we're already at that true root.
+  useEffect(() => {
+    const listenerPromise = CapacitorApp.addListener('backButton', () => {
+      if (fiveStageLessonKey) {
+        detailRef.current?.goBack();
+      } else if (isLessonActive) {
+        handleExitLesson();
+      } else if (activeTab === 'curriculum') {
+        soundFX.playClick();
+        setActiveTab('learn');
+      } else if (activeTab !== 'learn') {
+        soundFX.playClick();
+        setActiveTab('learn');
+      } else {
+        CapacitorApp.exitApp();
+      }
+    });
+
+    return () => {
+      listenerPromise.then((handle) => handle.remove());
+    };
+  }, [fiveStageLessonKey, isLessonActive, activeTab]);
+
   const handleLessonComplete = (earnedXP: number) => {
     setUserStats((prev) => {
       const updated: UserStats = {
@@ -198,7 +215,6 @@ export default function App() {
           <Header
             theme={theme}
             activeTab={activeTab}
-            userStats={userStats}
             onProfileClick={() => {
               setIsLessonActive(false);
               setFiveStageLessonKey(null);
@@ -218,10 +234,11 @@ export default function App() {
         )}
 
         {/* Screen Switcher */}
-        <main className="flex-1 w-full flex flex-col">
+        <main className={`flex-1 w-full flex flex-col font-size-${fontSize}`}>
           {fiveStageLessonKey ? (
-            /* 6-Stage Interactive Lesson Flow (Learn -> Explore -> Predict -> Write & Run -> Debug -> Mastered) */
-            <FiveStageLessonRunner
+            /* 5-Stage Interactive Lesson Flow (Learn -> Explore -> Predict -> Write & Run -> Mastered) */
+            <Detail
+              ref={detailRef}
               theme={theme}
               initialLessonKey={fiveStageLessonKey}
               userStats={userStats}
@@ -231,8 +248,6 @@ export default function App() {
                 setFiveStageLessonKey(null);
               }}
               onToggleTheme={toggleTheme}
-              tapToRevealEnabled={tapToRevealEnabled}
-              onToggleTapToReveal={toggleTapToReveal}
             />
           ) : isLessonActive ? (
             /* Active Challenge / Drill View */
@@ -245,7 +260,7 @@ export default function App() {
             />
           ) : activeTab === 'curriculum' ? (
             /* Curriculum Explorer View (Unrestricted dynamic core topic worlds) */
-            <CurriculumExplorer
+            <Listing
               theme={theme}
               initialWorldId={curriculumWorldId}
               onJumpToToday={() => setActiveTab('learn')}
@@ -253,7 +268,7 @@ export default function App() {
             />
           ) : activeTab === 'learn' ? (
             /* Main Learning Odyssey Path: Worlds-only landing page */
-            <LearnView
+            <Home
               theme={theme}
               userStats={userStats}
               onStartLesson={() => setFiveStageLessonKey('variables')}
@@ -276,16 +291,14 @@ export default function App() {
             /* User Profile & Settings */
             <ProfileView
               theme={theme}
-              fontSize={fontSize}
-              onSetFontSize={handleSetFontSize}
               userStats={userStats}
               onStartLesson={() => setFiveStageLessonKey('variables')}
               onOpenCurriculum={() => handleOpenCurriculum('world-1')}
               onToggleTheme={toggleTheme}
               soundEnabled={soundEnabled}
               onToggleSound={toggleSound}
-              tapToRevealEnabled={tapToRevealEnabled}
-              onToggleTapToReveal={toggleTapToReveal}
+              fontSize={fontSize}
+              onChangeFontSize={changeFontSize}
               onResetProgress={handleResetProgress}
             />
           )}
