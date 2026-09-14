@@ -477,61 +477,79 @@ export const Home: React.FC<HomeProps> = ({
     >
       <div className="flex flex-col w-full min-w-0 pb-12 pt-2">
         {/* ================= SUB-HEADER CARD: Kotlin Journey Title & Dynamic Progress ================= */}
-        <div className="px-5 pt-2 pb-4">
+        <div className="px-4 sm:px-5 pt-2 pb-4">
           <div
-            className={`neu-raised rounded-2xl p-4 flex items-center justify-between border transition-all ${
+            className={`neu-raised rounded-2xl p-3.5 sm:p-4 flex flex-col gap-2.5 border transition-all overflow-hidden ${
               isDark
                 ? 'bg-[#151b28] border-white/10 text-white'
                 : 'bg-[#e8eaf0] border-white/60 text-[#2e3040]'
             }`}
           >
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <div
-                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border shadow-sm ${
-                    isDark
-                      ? 'bg-slate-800 border-white/10 text-slate-200'
-                      : 'bg-[#dcdee4] border-white/60 text-[#2e3040]'
-                  }`}
-                >
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24">
-                    <defs>
-                      <linearGradient id="ktGradSub" x1="0%" x2="100%" y1="100%" y2="0%">
-                        <stop offset="0%" stopColor="#7F52FF"></stop>
-                        <stop offset="50%" stopColor="#C711E1"></stop>
-                        <stop offset="100%" stopColor="#E24462"></stop>
-                      </linearGradient>
-                    </defs>
-                    <polygon fill="url(#ktGradSub)" points="24,0 0,0 0,24 24,0"></polygon>
-                    <polygon fill="#7F52FF" points="0,24 12,12 24,24"></polygon>
-                  </svg>
-                  <span className="text-[9px] font-mono font-bold tracking-wider uppercase">
-                    Kotlin Journey
-                  </span>
-                </div>
-                <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 font-medium">
-                  22 Worlds Total
+            {/* Top Row: Track Identifier & Clickable Progress Status */}
+            <div className="flex items-center justify-between gap-2 w-full">
+              <div
+                className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border shadow-sm ${
+                  isDark
+                    ? 'bg-slate-800/90 border-white/10 text-slate-200'
+                    : 'bg-[#dcdee4] border-white/60 text-[#2e3040]'
+                }`}
+              >
+                <svg className="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24">
+                  <defs>
+                    <linearGradient id="ktGradSub" x1="0%" x2="100%" y1="100%" y2="0%">
+                      <stop offset="0%" stopColor="#7F52FF"></stop>
+                      <stop offset="50%" stopColor="#C711E1"></stop>
+                      <stop offset="100%" stopColor="#E24462"></stop>
+                    </linearGradient>
+                  </defs>
+                  <polygon fill="url(#ktGradSub)" points="24,0 0,0 0,24 24,0"></polygon>
+                  <polygon fill="#7F52FF" points="0,24 12,12 24,24"></polygon>
+                </svg>
+                <span className="text-[9px] font-mono font-bold tracking-wider uppercase whitespace-nowrap">
+                  Kotlin Journey
                 </span>
               </div>
-              <h1 className="text-base font-['Outfit'] font-bold tracking-tight">
+
+              <button
+                type="button"
+                onClick={() => {
+                  soundFX.playClick();
+                  onOpenCurriculum();
+                }}
+                className={`neu-pressed px-2.5 py-1 rounded-xl flex items-center gap-1.5 cursor-pointer active:scale-95 transition-all shrink-0 ${
+                  isDark ? 'bg-[#121824] hover:bg-[#182030]' : 'bg-[#dcdee4] hover:bg-[#d5d7df]'
+                }`}
+                title="Open Curriculum Explorer"
+              >
+                <span className="text-[9px] font-['Plus_Jakarta_Sans'] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider whitespace-nowrap">
+                  PROGRESS
+                </span>
+                <span className="font-mono text-xs font-bold text-inherit whitespace-nowrap">
+                  {progressPct}%
+                </span>
+                <span className="material-symbols-outlined text-[13px] text-slate-400">
+                  chevron_right
+                </span>
+              </button>
+            </div>
+
+            {/* Headline Row: Full Width Single Line Title */}
+            <div className="flex items-center min-w-0 pt-0.5">
+              <h1 className="text-sm sm:text-base font-['Outfit'] font-bold tracking-tight whitespace-nowrap truncate text-inherit">
                 World {currentWorld.order} of 22 • {currentWorld.title}
               </h1>
             </div>
 
+            {/* Bottom Progress Bar */}
             <div
-              onClick={() => {
-                soundFX.playClick();
-                onOpenCurriculum();
-              }}
-              className={`neu-pressed px-3 py-1.5 rounded-xl flex flex-col items-end gap-0.5 cursor-pointer active:scale-95 transition-transform ${
-                isDark ? 'bg-[#121824]' : 'bg-[#e8eaf0]'
+              className={`w-full h-1.5 rounded-full overflow-hidden ${
+                isDark ? 'bg-[#090d16]' : 'bg-slate-300/70'
               }`}
-              title="Open Curriculum Explorer"
             >
-              <span className="text-[9px] font-['Plus_Jakarta_Sans'] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
-                PROGRESS
-              </span>
-              <span className="font-mono text-xs font-bold text-inherit">{progressPct}%</span>
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 shadow-sm transition-all duration-500"
+                style={{ width: `${Math.max(Number(progressPct), 4)}%` }}
+              />
             </div>
           </div>
         </div>
@@ -738,7 +756,7 @@ export const Home: React.FC<HomeProps> = ({
           >
             <div className="max-w-md mx-auto px-5 py-2.5 flex items-center gap-3">
               <span
-                className={`text-[10px] font-mono font-bold tracking-wider uppercase text-purple-600 dark:text-purple-400 px-3 py-1 rounded-full neu-pressed border ${
+                className={`text-[10px] font-mono font-bold tracking-wider uppercase text-indigo-600 dark:text-indigo-400 px-3 py-1 rounded-full neu-pressed border ${
                   isDark ? 'bg-[#121824] border-white/5' : 'bg-[#e8eaf0] border-black/5'
                 }`}
               >
@@ -839,12 +857,12 @@ export const Home: React.FC<HomeProps> = ({
                 className={`w-12 h-12 rounded-2xl neu-raised flex items-center justify-center border relative transition-all ${
                   completedWorldsCount >= 15
                     ? isDark
-                      ? 'bg-[#151b28] border-purple-500/40'
-                      : 'bg-[#e8eaf0] border-purple-500/40'
+                      ? 'bg-[#151b28] border-indigo-500/40'
+                      : 'bg-[#e8eaf0] border-indigo-500/40'
                     : completedWorldsCount === 14
                     ? isDark
-                      ? 'bg-[#1c2236] border-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.5)] ring-2 ring-purple-500/30'
-                      : 'bg-white border-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.3)] ring-2 ring-purple-500/30'
+                      ? 'bg-[#1c2236] border-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.5)] ring-2 ring-indigo-500/30'
+                      : 'bg-white border-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.3)] ring-2 ring-indigo-500/30'
                     : isDark
                     ? 'bg-[#151b28] border-white/10'
                     : 'bg-[#e8eaf0] border-white/50'
@@ -852,13 +870,13 @@ export const Home: React.FC<HomeProps> = ({
               >
                 {completedWorldsCount >= 15 ? (
                   <span
-                    className="material-symbols-outlined text-purple-600 dark:text-purple-400 text-[22px]"
+                    className="material-symbols-outlined text-indigo-600 dark:text-indigo-400 text-[22px]"
                     style={{ fontVariationSettings: "'FILL' 1" }}
                   >
                     check_circle
                   </span>
                 ) : completedWorldsCount === 14 ? (
-                  <span className="material-symbols-outlined text-purple-500 text-[22px] animate-pulse">
+                  <span className="material-symbols-outlined text-indigo-500 text-[22px] animate-pulse">
                     shield
                   </span>
                 ) : (
@@ -875,7 +893,7 @@ export const Home: React.FC<HomeProps> = ({
               <span
                 className={`text-[10px] font-mono font-medium mt-1 ${
                   completedWorldsCount >= 14
-                    ? 'text-purple-600 dark:text-purple-400 font-bold'
+                    ? 'text-indigo-600 dark:text-indigo-400 font-bold'
                     : 'text-slate-500 dark:text-slate-400'
                 }`}
               >
@@ -903,7 +921,7 @@ export const Home: React.FC<HomeProps> = ({
           >
             <div className="max-w-md mx-auto px-5 py-2.5 flex items-center gap-3">
               <span
-                className={`text-[10px] font-mono font-bold tracking-wider uppercase text-rose-600 dark:text-rose-400 px-3 py-1 rounded-full neu-pressed border ${
+                className={`text-[10px] font-mono font-bold tracking-wider uppercase text-indigo-600 dark:text-indigo-400 px-3 py-1 rounded-full neu-pressed border ${
                   isDark ? 'bg-[#121824] border-white/5' : 'bg-[#e8eaf0] border-black/5'
                 }`}
               >
@@ -999,12 +1017,12 @@ export const Home: React.FC<HomeProps> = ({
               } ${
                 completedWorldsCount >= 22
                   ? isDark
-                    ? 'bg-[#151b28] border-purple-500/40 text-white'
-                    : 'bg-[#e8eaf0] border-purple-500/40 text-[#2e3040]'
+                    ? 'bg-[#151b28] border-indigo-500/40 text-white'
+                    : 'bg-[#e8eaf0] border-indigo-500/40 text-[#2e3040]'
                   : completedWorldsCount === 21
                   ? isDark
-                    ? 'bg-[#1e243a] border-purple-500 shadow-[0_0_16px_rgba(168,85,247,0.4)] text-white'
-                    : 'bg-white border-purple-500 shadow-[0_0_16px_rgba(168,85,247,0.3)] text-[#2e3040]'
+                    ? 'bg-[#1e243a] border-indigo-500 shadow-[0_0_16px_rgba(99,102,241,0.4)] text-white'
+                    : 'bg-white border-indigo-500 shadow-[0_0_16px_rgba(99,102,241,0.3)] text-[#2e3040]'
                   : isDark
                   ? 'bg-[#151b28] border-white/10 text-white'
                   : 'bg-[#e8eaf0] border-white/60 text-[#2e3040]'
@@ -1018,13 +1036,13 @@ export const Home: React.FC<HomeProps> = ({
                     isDark ? 'bg-[#121824]' : 'bg-[#e8eaf0]'
                   }`}
                 >
-                  <span className="material-symbols-outlined text-purple-600 dark:text-purple-400 text-[26px]">
+                  <span className="material-symbols-outlined text-indigo-600 dark:text-indigo-400 text-[26px]">
                     military_tech
                   </span>
                 </div>
                 <div className="flex flex-col">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] font-mono font-bold tracking-wider uppercase text-purple-600 dark:text-purple-400">
+                    <span className="text-[9px] font-mono font-bold tracking-wider uppercase text-indigo-600 dark:text-indigo-400">
                       FINAL WORLD 22
                     </span>
                     <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400">
@@ -1046,13 +1064,13 @@ export const Home: React.FC<HomeProps> = ({
               >
                 {completedWorldsCount >= 22 ? (
                   <span
-                    className="material-symbols-outlined text-purple-600 dark:text-purple-400 text-[18px]"
+                    className="material-symbols-outlined text-indigo-600 dark:text-indigo-400 text-[18px]"
                     style={{ fontVariationSettings: "'FILL' 1" }}
                   >
                     check_circle
                   </span>
                 ) : completedWorldsCount === 21 ? (
-                  <span className="material-symbols-outlined text-purple-500 text-[18px] animate-pulse">
+                  <span className="material-symbols-outlined text-indigo-500 text-[18px] animate-pulse">
                     play_arrow
                   </span>
                 ) : (

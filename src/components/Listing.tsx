@@ -304,7 +304,7 @@ export const Listing: React.FC<ListingProps> = ({
                 const totalLessons = Math.max(1, visibleLessons.length);
                 const completedInThisWorld =
                   selectedWorld.order === 1
-                    ? 2
+                    ? Math.min(totalLessons, userStats?.completedLessons ?? 1)
                     : selectedWorld.order <= completedWorldsCount
                     ? totalLessons
                     : 0;
@@ -312,55 +312,47 @@ export const Listing: React.FC<ListingProps> = ({
 
                 return (
                   <div
-                    className={`p-4 rounded-2xl border ${
+                    className={`p-4 rounded-2xl border transition-all ${
                       isDark
                         ? 'bg-[#0f1420] border-white/5'
                         : 'bg-[#f0f3f8] border-slate-200/60 shadow-sm'
                     }`}
                   >
-                    <div className="flex justify-between items-center mb-2.5">
-                      <span className="text-xs font-mono font-bold text-indigo-500 tracking-wide uppercase">
+                    <div className="flex items-center justify-between gap-3 mb-2.5">
+                      <span className="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400 tracking-wide uppercase whitespace-nowrap shrink-0">
                         {masteryPercentage}% Mastered
                       </span>
                       <div
-                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs ${
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs whitespace-nowrap shrink-0 ${
                           isDark
                             ? 'bg-[#151b28] border-white/10 text-slate-300'
                             : 'bg-white border-slate-200 text-slate-700 shadow-sm'
                         }`}
                       >
-                        <span className="text-[10px] font-mono font-bold uppercase text-slate-400">
-                          Today
-                        </span>
-                        <div className="flex items-center gap-0.5">
-                          {Array.from({ length: totalLessons }).map((_, i) => (
-                            <span
-                              key={i}
-                              className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                                i < completedInThisWorld
-                                  ? 'bg-emerald-500'
-                                  : isDark
-                                  ? 'bg-slate-700'
-                                  : 'bg-slate-300'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <span className="text-[11px] font-mono font-bold ml-0.5">
-                          {completedInThisWorld}/{totalLessons}
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${
+                            completedInThisWorld > 0
+                              ? 'bg-emerald-500'
+                              : isDark
+                              ? 'bg-slate-700'
+                              : 'bg-slate-300'
+                          }`}
+                        />
+                        <span className="text-[11px] font-mono font-bold">
+                          {completedInThisWorld}/{totalLessons} Lessons
                         </span>
                       </div>
                     </div>
 
                     {/* Progress Track */}
                     <div
-                      className={`w-full h-2.5 rounded-full overflow-hidden p-0.5 ${
+                      className={`w-full h-2 rounded-full overflow-hidden p-0.5 ${
                         isDark ? 'bg-[#090d16]' : 'bg-slate-200'
                       }`}
                     >
                       <div
                         className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-purple-500 to-pink-500 shadow-sm transition-all duration-500"
-                        style={{ width: `${masteryPercentage}%` }}
+                        style={{ width: `${Math.max(masteryPercentage, completedInThisWorld > 0 ? 5 : 0)}%` }}
                       ></div>
                     </div>
                   </div>
@@ -390,7 +382,7 @@ export const Listing: React.FC<ListingProps> = ({
                   const totalLessons = Math.max(1, visibleLessons.length);
                   const completedInThisWorld =
                     selectedWorld.order === 1
-                      ? 2
+                      ? Math.min(totalLessons, userStats?.completedLessons ?? 1)
                       : selectedWorld.order <= completedWorldsCount
                       ? totalLessons
                       : 0;

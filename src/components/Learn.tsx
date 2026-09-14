@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Stage1LearnData } from '../data/lessonStagesData';
 import { soundFX } from '../utils/audio';
+import { FunctionAnimatedExplainer } from './FunctionAnimatedExplainer';
+import { FunctionMentalModel } from './FunctionMentalModel';
 
 interface LearnStageProps {
   data: Stage1LearnData;
@@ -59,6 +61,11 @@ export const Learn: React.FC<LearnStageProps> = ({
 
   const isFullyRevealed = !tapToRevealEnabled || revealStep >= maxRevealStep;
 
+  const isFunctionTopic =
+    data.title.toLowerCase().includes('function') ||
+    data.subtitle.toLowerCase().includes('function') ||
+    data.exampleTitle.toLowerCase().includes('function');
+
   return (
     <div
       onClick={!isFullyRevealed ? handleNextReveal : undefined}
@@ -80,12 +87,35 @@ export const Learn: React.FC<LearnStageProps> = ({
       {/* 1: Concept Subtitle & Brief (Revealed on tap 1 or if tapToReveal is disabled) */}
       {(!tapToRevealEnabled || revealStep >= 1) && (
         <p
-          className={`mt-1 text-[15px] leading-relaxed mb-5 transition-all duration-300 animate-fadeIn ${
+          className={`mt-1 text-[15px] leading-relaxed mb-4 transition-all duration-300 animate-fadeIn ${
             isDark ? 'text-[#94a3b8]' : 'text-slate-600'
           }`}
         >
           {data.subtitle}
         </p>
+      )}
+
+      {/* 1.5: Animated Explanation of "What is a Function and How It Works" */}
+      {isFunctionTopic && (!tapToRevealEnabled || revealStep >= 1) && (
+        <div
+          className="mb-4 transition-all duration-300 animate-fadeIn"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <FunctionAnimatedExplainer isDark={isDark} />
+        </div>
+      )}
+
+      {/* Temporary side-by-side comparison: our own take on the same mental model */}
+      {isFunctionTopic && (!tapToRevealEnabled || revealStep >= 1) && (
+        <div
+          className="mb-4 transition-all duration-300 animate-fadeIn"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <p className={`text-[10px] font-bold uppercase tracking-widest mb-1.5 px-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+            Alternate version
+          </p>
+          <FunctionMentalModel isDark={isDark} />
+        </div>
       )}
 
       {/* 2: Simple Concept Example Card (Revealed on tap 2 or if tapToReveal is disabled) */}
