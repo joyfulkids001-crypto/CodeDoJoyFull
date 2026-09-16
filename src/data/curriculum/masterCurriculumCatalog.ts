@@ -66,8 +66,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "kotlin-fundamentals",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Single-line // and multi-line /* */ comments: writing notes for humans that the compiler ignores.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "comments"
       },
       {
         "id": "world-1-print-println",
@@ -76,8 +77,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "kotlin-fundamentals",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Console output and formatting: staying on the current line with print() vs dropping to a new line with println().",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "print-println"
       },
       {
         "id": "world-1-val-vs-var",
@@ -86,8 +88,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "kotlin-fundamentals",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "The golden rule of Kotlin variables: immutable read-only val vs mutable reassignable var.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "val-vs-var"
       },
       {
         "id": "world-1-variables-type-inference",
@@ -96,8 +99,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "kotlin-fundamentals",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "How Kotlin deduces types automatically and how to write explicit : Type annotations.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "variables-type-inference"
       },
       {
         "id": "world-1-int-long",
@@ -106,8 +110,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "kotlin-fundamentals",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Whole numbers: standard 32-bit Int vs 64-bit Long with the L suffix and underscore separators.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "int-long"
       },
       {
         "id": "world-1-float-double",
@@ -116,8 +121,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "kotlin-fundamentals",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Decimal numbers: 64-bit Double by default and 32-bit Float with the mandatory f suffix.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "float-double"
       },
       {
         "id": "world-1-boolean",
@@ -126,8 +132,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "kotlin-fundamentals",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Binary logic flags: true and false, comparison operations, and the ! NOT negation operator.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "boolean"
       },
       {
         "id": "world-1-char",
@@ -136,8 +143,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "kotlin-fundamentals",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Single characters: strict single-quote 'A' syntax vs double-quote Strings and escape sequences.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "char"
       },
       {
         "id": "world-1-string",
@@ -146,8 +154,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "kotlin-fundamentals",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Text in double quotes: .length property, string concatenation, and multi-line raw strings.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "string"
       },
       {
         "id": "world-1-string-templates",
@@ -156,8 +165,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "kotlin-fundamentals",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Clean interpolation: embedding variables with $variable and expressions with ${expression}.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "string-templates"
       },
       {
         "id": "world-1-boss",
@@ -166,9 +176,10 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "boss",
         "durationMinutes": 10,
         "xpReward": 50,
-        "description": "Build a small standalone Kotlin program that declares different variables, uses appropriate data types, prints values, and uses string templates.",
-        "questionsCount": 0,
-        "isBoss": true
+        "description": "World 1 Capstone: Build a complete standalone Kotlin program integrating variables, data types, and string templates.",
+        "questionsCount": 3,
+        "isBoss": true,
+        "fiveStageLessonKey": "world-1-boss"
       }
     ]
   },
@@ -190,8 +201,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "operators",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "The five arithmetic operators: +, -, *, /, and % -- including Int / Int truncation and Double promotion.",
+        "questionsCount": 5,
+        "fiveStageLessonKey": "world-2-arithmetic-operators"
       },
       {
         "id": "world-2-comparison-operators",
@@ -200,8 +212,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "operators",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Structural equality with ==, inequality with !=, and relational ordering with <, >, <=, >=.",
+        "questionsCount": 5,
+        "fiveStageLessonKey": "world-2-comparison-operators"
       },
       {
         "id": "world-2-logical-operators",
@@ -210,8 +223,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "operators",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Combining conditions with && (AND) and || (OR), negating with ! (NOT), and how precedence groups them.",
+        "questionsCount": 5,
+        "fiveStageLessonKey": "world-2-logical-operators"
       },
       {
         "id": "world-2-assignment-operators",
@@ -220,8 +234,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "operators",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Plain assignment with = and the compound shorthand +=, -=, *=, /=, and %=, all of which require var.",
+        "questionsCount": 4,
+        "fiveStageLessonKey": "world-2-assignment-operators"
       },
       {
         "id": "world-2-increment-decrement",
@@ -230,8 +245,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "operators",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "The ++ and -- operators, prefix vs postfix form, and why they only work on var.",
+        "questionsCount": 5,
+        "fiveStageLessonKey": "world-2-increment-decrement"
       },
       {
         "id": "world-2-operator-precedence",
@@ -240,8 +256,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "operators",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "The order Kotlin evaluates mixed expressions in: * / % before + -, before comparisons, before && before ||.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-2-operator-precedence"
       },
       {
         "id": "world-2-boss",
@@ -251,8 +268,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "durationMinutes": 10,
         "xpReward": 50,
         "description": "Build a calculator/decision program that combines arithmetic, comparisons, logical conditions, assignments, increment/decrement, and precedence.",
-        "questionsCount": 0,
-        "isBoss": true
+        "questionsCount": 4,
+        "isBoss": true,
+        "fiveStageLessonKey": "world-2-boss"
       }
     ]
   },
@@ -274,8 +292,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "conditions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Running a block of code only when a Boolean condition is true.",
+        "questionsCount": 5,
+        "fiveStageLessonKey": "world-3-if"
       },
       {
         "id": "world-3-if-else",
@@ -284,8 +303,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "conditions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Two-way branching with if/else, both as a statement and as a single-line expression replacing the ternary operator.",
+        "questionsCount": 5,
+        "fiveStageLessonKey": "world-3-if-else"
       },
       {
         "id": "world-3-else-if",
@@ -294,8 +314,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "conditions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Chaining multiple conditions with else if -- only the first matching branch runs, so order matters.",
+        "questionsCount": 6,
+        "fiveStageLessonKey": "world-3-else-if"
       },
       {
         "id": "world-3-when",
@@ -304,8 +325,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "conditions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "A cleaner alternative to long else-if chains: matching a required subject against comma-separated values, with else as the catch-all.",
+        "questionsCount": 6,
+        "fiveStageLessonKey": "world-3-when"
       },
       {
         "id": "world-3-when-with-ranges",
@@ -314,8 +336,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "conditions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Matching a whole span of values in one when branch using in a..b / !in a..b, with both ends inclusive.",
+        "questionsCount": 5,
+        "fiveStageLessonKey": "world-3-when-with-ranges"
       },
       {
         "id": "world-3-when-as-an-expression",
@@ -324,8 +347,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "conditions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Assigning the result of a when block directly to a val, with a required else so every case produces a value.",
+        "questionsCount": 5,
+        "fiveStageLessonKey": "world-3-when-as-an-expression"
       },
       {
         "id": "world-3-multiple-conditions-and-nested-condition",
@@ -333,9 +357,10 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "worldId": "world-3",
         "skill": "conditions",
         "durationMinutes": 3,
-        "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "xpReward": 30,
+        "description": "Combining conditions in one if with && / ||, versus nesting one if inside another to express dependent, sequential checks.",
+        "questionsCount": 5,
+        "fiveStageLessonKey": "world-3-multiple-conditions-and-nested-condition"
       },
       {
         "id": "world-3-type-checks-with-is-where-appropriate",
@@ -344,8 +369,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "conditions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Checking a value's runtime type with is / !is -- most useful for an Any-typed value that could hold different kinds of data.",
+        "questionsCount": 5,
+        "fiveStageLessonKey": "world-3-type-checks-with-is-where-appropriate"
       },
       {
         "id": "world-3-boss",
@@ -355,8 +381,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "durationMinutes": 10,
         "xpReward": 50,
         "description": "Build a program that evaluates multiple conditions and produces decisions/results.",
-        "questionsCount": 0,
-        "isBoss": true
+        "questionsCount": 4,
+        "isBoss": true,
+        "fiveStageLessonKey": "world-3-boss"
       }
     ]
   },
@@ -378,8 +405,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "loops-ranges-progressions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Repeating a block once for every value in an inclusive range with for (i in a..b).",
+        "questionsCount": 5,
+        "fiveStageLessonKey": "world-4-for"
       },
       {
         "id": "world-4-while",
@@ -388,8 +416,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "loops-ranges-progressions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Repeating a block for as long as a condition stays true, checked before every pass.",
+        "questionsCount": 6,
+        "fiveStageLessonKey": "world-4-while"
       },
       {
         "id": "world-4-do-while",
@@ -398,8 +427,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "loops-ranges-progressions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Guaranteeing at least one execution of the loop body by checking the condition after it runs.",
+        "questionsCount": 6,
+        "fiveStageLessonKey": "world-4-do-while"
       },
       {
         "id": "world-4-ranges",
@@ -408,8 +438,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "loops-ranges-progressions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Using a..b both to drive a for-loop and to test membership with in / !in, inclusive on both ends.",
+        "questionsCount": 6,
+        "fiveStageLessonKey": "world-4-ranges"
       },
       {
         "id": "world-4-progressions",
@@ -418,8 +449,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "loops-ranges-progressions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "A range combined with a step size -- recognizing a plain range as an implicit step-1 progression.",
+        "questionsCount": 6,
+        "fiveStageLessonKey": "world-4-progressions"
       },
       {
         "id": "world-4-downto",
@@ -428,8 +460,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "loops-ranges-progressions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Counting down in a for-loop with downTo, and why a backwards a..b range silently produces zero iterations.",
+        "questionsCount": 5,
+        "fiveStageLessonKey": "world-4-downto"
       },
       {
         "id": "world-4-step",
@@ -438,8 +471,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "loops-ranges-progressions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Changing the interval between loop values with step, across .., until, and downTo.",
+        "questionsCount": 5,
+        "fiveStageLessonKey": "world-4-step"
       },
       {
         "id": "world-4-break",
@@ -448,8 +482,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "loops-ranges-progressions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Immediately exiting the nearest enclosing loop the moment a condition is met.",
+        "questionsCount": 5,
+        "fiveStageLessonKey": "world-4-break"
       },
       {
         "id": "world-4-continue",
@@ -458,8 +493,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "loops-ranges-progressions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Skipping the rest of the current iteration while the loop itself keeps running -- contrasted with break.",
+        "questionsCount": 6,
+        "fiveStageLessonKey": "world-4-continue"
       },
       {
         "id": "world-4-nested-loops",
@@ -467,9 +503,10 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "worldId": "world-4",
         "skill": "loops-ranges-progressions",
         "durationMinutes": 3,
-        "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "xpReward": 30,
+        "description": "Placing one loop entirely inside another, so the inner loop runs fully for every outer iteration.",
+        "questionsCount": 5,
+        "fiveStageLessonKey": "world-4-nested-loops"
       },
       {
         "id": "world-4-boss",
@@ -477,10 +514,11 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "worldId": "world-4",
         "skill": "boss",
         "durationMinutes": 10,
-        "xpReward": 50,
+        "xpReward": 60,
         "description": "Build a program that processes a range of values using multiple loop constructs and control statements.",
-        "questionsCount": 0,
-        "isBoss": true
+        "questionsCount": 4,
+        "isBoss": true,
+        "fiveStageLessonKey": "world-4-boss"
       }
     ]
   },
@@ -502,8 +540,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "functions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Define focused reusable functions and distinguish defining a function from calling it.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-5-defining-functions"
       },
       {
         "id": "world-5-function-parameters",
@@ -512,8 +551,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "functions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Pass typed input values into a function and use them in its body.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-5-function-parameters"
       },
       {
         "id": "world-5-return-values",
@@ -522,8 +562,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "functions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Return computed values to a caller using a declared return type and return expression.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-5-return-values"
       },
       {
         "id": "world-5-default-parameters",
@@ -532,8 +573,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "functions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Give parameters sensible fallback values that callers can omit or override.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-5-default-parameters"
       },
       {
         "id": "world-5-named-arguments",
@@ -542,8 +584,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "functions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Use Kotlin named arguments to make call sites readable and safely reorder values.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-5-named-arguments"
       },
       {
         "id": "world-5-single-expression-functions",
@@ -552,8 +595,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "functions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Write concise functions whose single expression is automatically returned.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-5-single-expression-functions"
       },
       {
         "id": "world-5-local-functions",
@@ -562,8 +606,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "functions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Nest helper functions inside the scope where they are useful.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-5-local-functions"
       },
       {
         "id": "world-5-vararg",
@@ -572,8 +617,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "functions",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Accept a flexible number of trailing inputs with vararg and process every value.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-5-vararg"
       },
       {
         "id": "world-5-boss",
@@ -582,9 +628,10 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "boss",
         "durationMinutes": 10,
         "xpReward": 50,
-        "description": "Build a reusable collection of functions that perform several related operations.",
-        "questionsCount": 0,
-        "isBoss": true
+        "description": "Build and repair a reusable collection of focused functions using the World 5 toolkit.",
+        "questionsCount": 3,
+        "isBoss": true,
+        "fiveStageLessonKey": "world-5-boss"
       }
     ]
   },
@@ -606,8 +653,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "collections",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Create ordered arrays, access their zero-based indexes, and update existing elements.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-6-arrays"
       },
       {
         "id": "world-6-lists",
@@ -616,8 +664,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "collections",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Create ordered read-only Lists, access zero-based indexes, and check their size.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-6-lists"
       },
       {
         "id": "world-6-sets",
@@ -626,8 +675,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "collections",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Create Sets that automatically remove duplicates, check membership with contains, and add unique values.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-6-sets"
       },
       {
         "id": "world-6-maps",
@@ -636,8 +686,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "collections",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Pair keys with values using mapOf, look up values by key, and check key presence with containsKey.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-6-maps"
       },
       {
         "id": "world-6-mutable-vs-read-only-collections",
@@ -646,8 +697,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "collections",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Distinguish read-only listOf/setOf/mapOf from mutable mutableListOf/mutableSetOf/mutableMapOf, and see how val interacts with each.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-6-mutable-vs-read-only-collections"
       },
       {
         "id": "world-6-creating-and-accessing-collections",
@@ -656,8 +708,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "collections",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Create collections with arrayOf/listOf/setOf/mapOf, and read values with [], get(), first(), and last().",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-6-creating-and-accessing-collections"
       },
       {
         "id": "world-6-adding-removing-updating-mutable-element",
@@ -666,8 +719,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "collections",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Change a mutable List with add, remove(value), removeAt(index), and [] = for in-place position updates.",
+        "questionsCount": 4,
+        "fiveStageLessonKey": "world-6-adding-removing-updating-mutable-element"
       },
       {
         "id": "world-6-iterating-over-collections",
@@ -676,8 +730,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "collections",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Loop through a List, Set, and Map's entries, and combine a loop with conditions and an accumulator.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-6-iterating-over-collections"
       },
       {
         "id": "world-6-basic-collection-operations",
@@ -686,8 +741,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "collections",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Use isEmpty()/isNotEmpty(), indexOf, and sorted() to check, search, and order collections without a manual loop.",
+        "questionsCount": 4,
+        "fiveStageLessonKey": "world-6-basic-collection-operations"
       },
       {
         "id": "world-6-choosing-the-right-collection-type",
@@ -696,8 +752,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "collections",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Match a data problem to the right collection: List for order and duplicates, Set for uniqueness, Map for lookup by key.",
+        "questionsCount": 4,
+        "fiveStageLessonKey": "world-6-choosing-the-right-collection-type"
       },
       {
         "id": "world-6-boss",
@@ -706,9 +763,10 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "boss",
         "durationMinutes": 10,
         "xpReward": 50,
-        "description": "Build a small student-record system using multiple collection types.",
-        "questionsCount": 0,
-        "isBoss": true
+        "description": "Build a small student-record system combining a List, a Set, and a mutable Map.",
+        "questionsCount": 3,
+        "isBoss": true,
+        "fiveStageLessonKey": "world-6-boss"
       }
     ]
   },
@@ -730,8 +788,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "null-safety",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Mark a type with ? to allow null, and see that null is distinct from an empty string or zero.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-7-nullable-types"
       },
       {
         "id": "world-7-nullable-variables",
@@ -740,8 +799,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "null-safety",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Reassign a nullable var freely between null and a real value, in either direction.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-7-nullable-variables"
       },
       {
         "id": "world-7-safe-call",
@@ -750,8 +810,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "null-safety",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Access a property or method only when a value is not null, avoiding a crash by producing null instead.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-7-safe-call"
       },
       {
         "id": "world-7-elvis-operator",
@@ -760,8 +821,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "null-safety",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Supply a fallback value for null with ?:, alone or chained after a safe call.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-7-elvis-operator"
       },
       {
         "id": "world-7-non-null-assertion",
@@ -770,8 +832,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "null-safety",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Assert a nullable value is definitely non-null with !!, and see it crash when that assertion is wrong.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-7-non-null-assertion"
       },
       {
         "id": "world-7-null-checks",
@@ -780,8 +843,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "null-safety",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Branch on nullability with if (x != null) and if (x == null), whichever direction reads more clearly.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-7-null-checks"
       },
       {
         "id": "world-7-smart-casts",
@@ -790,8 +854,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "null-safety",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "See how a null check unlocks safe, direct . access for the rest of its own block.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-7-smart-casts"
       },
       {
         "id": "world-7-safe-casts-as",
@@ -800,8 +865,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "null-safety",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Cast to a type only when the value genuinely matches, getting null instead of a crash when it doesn't.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-7-safe-casts-as"
       },
       {
         "id": "world-7-nullable-collections-and-collection-valu",
@@ -810,8 +876,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "null-safety",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Distinguish nullable elements inside a collection from a nullable collection reference itself.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-7-nullable-collections-and-collection-valu"
       },
       {
         "id": "world-7-chaining-nullable-operations",
@@ -820,8 +887,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "null-safety",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Chain ?. across multiple steps that could each independently be null, finished with one ?: fallback.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-7-chaining-nullable-operations"
       },
       {
         "id": "world-7-boss",
@@ -831,8 +899,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "durationMinutes": 10,
         "xpReward": 50,
         "description": "Build a program that safely processes incomplete/missing data without unnecessary crashes.",
-        "questionsCount": 0,
-        "isBoss": true
+        "questionsCount": 3,
+        "isBoss": true,
+        "fiveStageLessonKey": "world-7-boss"
       }
     ]
   },
@@ -854,8 +923,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "basic-oop",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Define a class with properties and methods, and create instances without a new keyword.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-8-classes"
       },
       {
         "id": "world-8-objects",
@@ -864,8 +934,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "basic-oop",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Declare a singleton with object and access its members directly by name.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-8-objects"
       },
       {
         "id": "world-8-properties",
@@ -874,8 +945,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "basic-oop",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Distinguish val properties (fixed after construction) from var properties (reassignable anytime).",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-8-properties"
       },
       {
         "id": "world-8-methods",
@@ -884,8 +956,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "basic-oop",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Give methods their own parameters, call one method from another, and use action methods to change state.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-8-methods"
       },
       {
         "id": "world-8-constructors",
@@ -894,8 +967,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "basic-oop",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Declare properties explicitly and assign them from constructor parameters inside an init block.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-8-constructors"
       },
       {
         "id": "world-8-primary-constructors",
@@ -904,8 +978,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "basic-oop",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Use the val/var shorthand to declare and assign a property in one step, right in the constructor.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-8-primary-constructors"
       },
       {
         "id": "world-8-init",
@@ -914,8 +989,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "basic-oop",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Run logic automatically at construction with init, including conditionals, derived properties, and multiple blocks in order.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-8-init"
       },
       {
         "id": "world-8-visibility-modifiers",
@@ -924,8 +1000,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "basic-oop",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Distinguish public (the default) from private, and reason about which code can access a given member.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-8-visibility-modifiers"
       },
       {
         "id": "world-8-data-classes",
@@ -934,8 +1011,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "basic-oop",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Add data before class to auto-generate a readable toString() that shows every property by name.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-8-data-classes"
       },
       {
         "id": "world-8-enums",
@@ -944,8 +1022,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "basic-oop",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Define a fixed set of named constants with enum class, optionally carrying their own properties.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-8-enums"
       },
       {
         "id": "world-8-basic-inheritance",
@@ -954,8 +1033,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "basic-oop",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Share behavior with an open parent class, and override specific methods in a subclass.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-8-basic-inheritance"
       },
       {
         "id": "world-8-interfaces",
@@ -964,8 +1044,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "basic-oop",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Declare a shared contract with interface, and implement it differently across unrelated classes.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-8-interfaces"
       },
       {
         "id": "world-8-overriding-members",
@@ -974,8 +1055,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "skill": "basic-oop",
         "durationMinutes": 3,
         "xpReward": 20,
-        "description": "Placeholder -- lesson content not yet authored. See CODEDO_MASTER_PLAN.md for the intended topic scope.",
-        "questionsCount": 0
+        "description": "Override properties and methods, and see real polymorphism across mixed subclasses in one loop.",
+        "questionsCount": 3,
+        "fiveStageLessonKey": "world-8-overriding-members"
       },
       {
         "id": "world-8-boss",
@@ -985,8 +1067,9 @@ export const CODEDO_MASTER_WORLDS: MasterWorldEntry[] = [
         "durationMinutes": 10,
         "xpReward": 50,
         "description": "Build a small application that stores students, calculates grades, uses collections, functions, conditions, loops, classes, and null safety.",
-        "questionsCount": 0,
-        "isBoss": true
+        "questionsCount": 3,
+        "isBoss": true,
+        "fiveStageLessonKey": "world-8-boss"
       }
     ]
   },

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Stage2ExploreData } from '../data/lessonStagesData';
 import { soundFX } from '../utils/audio';
+import { renderKotlinCodeLines } from '../utils/codeHighlighter';
 
 interface ExploreStageProps {
   data: Stage2ExploreData;
@@ -316,7 +317,7 @@ export const Explore: React.FC<ExploreStageProps> = ({
                 e.stopPropagation();
                 handleCardClick(idx);
               }}
-              className={`w-full rounded-2xl p-5 border transition-all duration-300 animate-fadeIn ${
+              className={`w-full rounded-2xl p-3.5 sm:p-5 border transition-all duration-300 animate-fadeIn ${
                 exploreCardIndex === idx
                   ? isDark
                     ? 'bg-[#171b26] border-indigo-500/40 shadow-lg'
@@ -366,33 +367,15 @@ export const Explore: React.FC<ExploreStageProps> = ({
 
               {/* Code Snippet Container */}
               <div
-                className={`rounded-xl p-4 font-mono text-sm leading-relaxed mb-4 overflow-x-auto ${
+                className={`rounded-xl p-3 sm:p-3.5 font-mono text-sm leading-relaxed mb-3 overflow-x-auto ${
                   isDark
                     ? 'bg-[#0f131d] border border-[#262c3d] text-slate-200'
                     : 'bg-slate-50 border border-slate-200/70 text-slate-800'
                 }`}
               >
-                {card.code.map((line, lIdx) => (
+                {renderKotlinCodeLines(card.code, { isDark }).map((node, lIdx) => (
                   <div key={lIdx} className="whitespace-pre">
-                    {line.startsWith('fun ') ? (
-                      <>
-                        <span className="text-indigo-500 font-semibold">fun </span>
-                        <span className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                          {line.substring(4)}
-                        </span>
-                      </>
-                    ) : line.includes('println') ? (
-                      <span className="pl-4">
-                        <span className={isDark ? 'text-white' : 'text-slate-900'}>println</span>
-                        (
-                        <span className="text-emerald-500">
-                          {line.substring(line.indexOf('(') + 1, line.lastIndexOf(')'))}
-                        </span>
-                        )
-                      </span>
-                    ) : (
-                      <span>{line}</span>
-                    )}
+                    {node}
                   </div>
                 ))}
               </div>
@@ -466,7 +449,7 @@ export const Explore: React.FC<ExploreStageProps> = ({
             : 'bg-gradient-to-t from-[#f1f4f9] via-[#f1f4f9]/95 to-transparent'
         }`}
       >
-      <div className="max-w-md mx-auto px-4">
+      <div className="max-w-2xl mx-auto px-2 sm:px-4">
         {!isFullyRevealed ? (
           /* Subtle Minimalist Tap Hint (Finger icon + short text) positioned nicely above bottom edge.
               The wrapper (not just the pill) carries the click handler and extra vertical padding so

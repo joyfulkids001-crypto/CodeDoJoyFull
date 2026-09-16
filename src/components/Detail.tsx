@@ -1,7 +1,9 @@
-import React, { forwardRef, useState, useImperativeHandle } from 'react';
+import React, { forwardRef, useState, useEffect, useImperativeHandle } from 'react';
 import { AppTheme, UserStats } from '../types';
 import { FiveStageLesson, AVAILABLE_FIVE_STAGE_LESSONS } from '../data/lessonStagesData';
 import { soundFX } from '../utils/audio';
+import { DetailedTutorialView } from './DetailedTutorialView';
+import { getDetailedTutorial } from '../data/detailedTutorialsData';
 
 // 6 Lesson Stage Components (1: Learn, 2: Explore, 3: Predict, 4: Write & Run, 5: Debug, 6: Mastered)
 import { Learn } from './Learn';
@@ -11,9 +13,12 @@ import { WriteRun } from './WriteRun';
 import { Debug } from './Debug';
 import { Mastered } from './Mastered';
 
+export type StageKey = 'learn' | 'explore' | 'predict' | 'writeRun' | 'debug' | 'mastered';
+
 interface DetailProps {
   theme: AppTheme;
   initialLessonKey?: string;
+  initialStageKey?: StageKey;
   userStats: UserStats;
   onExit: () => void;
   onCompleteLesson: (earnedXP: number, worldId?: string) => void;
@@ -29,104 +34,12 @@ export interface DetailHandle {
   goBack: () => void;
 }
 
-const renderSnippetLine = (line: string, isDark: boolean) => {
-  const trimmed = line.trim();
-  const indent = line.startsWith('    ') || line.startsWith('\t');
-  const indentClass = indent ? 'pl-4' : '';
-
-  if (trimmed.startsWith('//')) {
-    return (
-      <div className={`${indentClass} ${isDark ? 'text-slate-500 italic' : 'text-slate-400 italic'}`}>
-        {line}
-      </div>
-    );
-  }
-
-  if (trimmed.startsWith('fun ')) {
-    const afterFun = trimmed.slice(4);
-    const parenIdx = afterFun.indexOf('(');
-    const fnName = parenIdx !== -1 ? afterFun.slice(0, parenIdx) : afterFun;
-    const rest = parenIdx !== -1 ? afterFun.slice(parenIdx) : '';
-    return (
-      <div className={indentClass}>
-        <span className={isDark ? 'text-[#c084fc] font-semibold' : 'text-indigo-600 font-semibold'}>fun</span>{' '}
-        <span className={isDark ? 'text-[#93c5fd] font-semibold' : 'text-indigo-900 font-semibold'}>{fnName}</span>
-        <span className={isDark ? 'text-[#94a3b8]' : 'text-slate-700'}>{rest}</span>
-      </div>
-    );
-  }
-
-  if (trimmed.startsWith('for ')) {
-    return (
-      <div className={indentClass}>
-        <span className={isDark ? 'text-[#c084fc] font-semibold' : 'text-indigo-600 font-semibold'}>for</span>{' '}
-        <span className={isDark ? 'text-[#94a3b8]' : 'text-slate-700'}>(</span>
-        <span className={isDark ? 'text-slate-200 font-medium' : 'text-slate-900 font-medium'}>i</span>{' '}
-        <span className={isDark ? 'text-[#c084fc] font-semibold' : 'text-indigo-600 font-semibold'}>in</span>{' '}
-        <span className={isDark ? 'text-[#fbbf24]' : 'text-amber-600'}>1..3</span>
-        <span className={isDark ? 'text-[#94a3b8]' : 'text-slate-700'}>) {'{'}</span>
-      </div>
-    );
-  }
-
-  if (trimmed.startsWith('val ') || trimmed.startsWith('var ')) {
-    const kw = trimmed.startsWith('val ') ? 'val' : 'var';
-    const rest = trimmed.slice(4);
-    const eqIdx = rest.indexOf('=');
-    if (eqIdx !== -1) {
-      const lhs = rest.slice(0, eqIdx).trim();
-      const rhs = rest.slice(eqIdx + 1).trim();
-      return (
-        <div className={indentClass}>
-          <span className={isDark ? 'text-[#c084fc] font-semibold' : 'text-indigo-600 font-semibold'}>{kw}</span>{' '}
-          <span className={isDark ? 'text-slate-200 font-medium' : 'text-slate-900 font-medium'}>{lhs}</span>{' '}
-          <span className={isDark ? 'text-[#94a3b8]' : 'text-slate-700'}>=</span>{' '}
-          <span className={isDark ? 'text-[#34d399]' : 'text-emerald-600'}>{rhs}</span>
-        </div>
-      );
-    }
-  }
-
-  if (trimmed.startsWith('println(')) {
-    const inside = trimmed.slice(8, trimmed.lastIndexOf(')'));
-    return (
-      <div className={indentClass}>
-        <span className={isDark ? 'text-[#38bdf8]' : 'text-blue-600'}>println</span>
-        <span className={isDark ? 'text-[#94a3b8]' : 'text-slate-700'}>(</span>
-        <span className={isDark ? 'text-[#34d399]' : 'text-emerald-600'}>{inside}</span>
-        <span className={isDark ? 'text-[#94a3b8]' : 'text-slate-700'}>)</span>
-      </div>
-    );
-  }
-
-  if (trimmed.startsWith('return ')) {
-    const expr = trimmed.slice(7);
-    return (
-      <div className={indentClass}>
-        <span className={isDark ? 'text-[#c084fc] font-semibold' : 'text-indigo-600 font-semibold'}>return</span>{' '}
-        <span className={isDark ? 'text-slate-200' : 'text-slate-800'}>{expr}</span>
-      </div>
-    );
-  }
-
-  if (trimmed === '}') {
-    return (
-      <div className={indentClass}>
-        <span className={isDark ? 'text-[#94a3b8]' : 'text-slate-700'}>{'}'}</span>
-      </div>
-    );
-  }
-
-  return <div className={`${indentClass} ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{line}</div>;
-};
-
 // The six possible stage keys, in their fixed relative order. Which ones are
 // actually present for a given lesson depends on its data (see activeStages
 // below) -- Learn and Mastered always run; the rest only run when the lesson
 // provides that stage's data, per CODEDO_MASTER_PLAN.md's "topic-aware
 // activity selection" (e.g. a purely conceptual topic may only need
 // Learn -> Predict-as-MCQ -> Mastered).
-type StageKey = 'learn' | 'explore' | 'predict' | 'writeRun' | 'debug' | 'mastered';
 
 const STAGE_LABELS: Record<StageKey, string> = {
   learn: 'LEARN',
@@ -152,10 +65,12 @@ const STAGE_CONTINUE_LABELS: Record<StageKey, string> = {
 export const Detail = forwardRef<DetailHandle, DetailProps>(({
   theme,
   initialLessonKey = 'functions',
+  initialStageKey,
   userStats,
   onExit,
   onCompleteLesson,
   onToggleTheme,
+  tapToRevealEnabled = true,
 }, ref) => {
   const [currentLessonKey] = useState<string>(initialLessonKey);
   const [exploreCardIndex, setExploreCardIndex] = useState<number>(0);
@@ -181,7 +96,20 @@ export const Detail = forwardRef<DetailHandle, DetailProps>(({
     AVAILABLE_FIVE_STAGE_LESSONS.variables;
   const [userCode, setUserCode] = useState<string>(lessonData.writeRun?.initialCode ?? '');
   const [hasRunCode, setHasRunCode] = useState<boolean>(false);
-  const [actualOutput, setActualOutput] = useState<string>(lessonData.writeRun?.expectedOutput ?? '');
+  const [actualOutput, setActualOutput] = useState<string>('');
+
+  // Detailed Tutorial state (available for World 1 Lessons 1, 2, 3)
+  const [showDetailedTutorial, setShowDetailedTutorial] = useState<boolean>(false);
+  const detailedTutorial =
+    getDetailedTutorial(lessonData.id) ||
+    getDetailedTutorial(currentLessonKey) ||
+    getDetailedTutorial(lessonData.topicTitle);
+
+  useEffect(() => {
+    setUserCode(lessonData.writeRun?.initialCode ?? '');
+    setHasRunCode(false);
+    setActualOutput('');
+  }, [currentLessonKey]);
 
   // Which stages this specific lesson actually uses, in order. Learn and
   // Mastered always run; explore/predict/writeRun/debug only run when the
@@ -194,7 +122,9 @@ export const Detail = forwardRef<DetailHandle, DetailProps>(({
     ...(lessonData.debug ? (['debug'] as const) : []),
     'mastered',
   ];
-  const [currentStageKey, setCurrentStageKey] = useState<StageKey>(activeStages[0]);
+  const [currentStageKey, setCurrentStageKey] = useState<StageKey>(
+    initialStageKey && activeStages.includes(initialStageKey) ? initialStageKey : activeStages[0]
+  );
   const currentStageIndex = activeStages.indexOf(currentStageKey);
   const nextStageKey = activeStages[currentStageIndex + 1];
   const nextStageLabel = nextStageKey ? STAGE_CONTINUE_LABELS[nextStageKey] : undefined;
@@ -240,6 +170,10 @@ export const Detail = forwardRef<DetailHandle, DetailProps>(({
 
   const handlePreviousStage = () => {
     soundFX.playClick();
+    if (showDetailedTutorial) {
+      setShowDetailedTutorial(false);
+      return;
+    }
     if (currentStageIndex > 0) {
       setCurrentStageKey(activeStages[currentStageIndex - 1]);
       scrollToTop();
@@ -251,7 +185,13 @@ export const Detail = forwardRef<DetailHandle, DetailProps>(({
   // Exposed so the app-wide hardware back-button handler (App.tsx) can step
   // back through lesson stages the same way the in-screen back arrow does.
   useImperativeHandle(ref, () => ({
-    goBack: handlePreviousStage,
+    goBack: () => {
+      if (showDetailedTutorial) {
+        setShowDetailedTutorial(false);
+        return;
+      }
+      handlePreviousStage();
+    },
   }));
 
   const handleJumpToStage = (key: StageKey) => {
@@ -292,6 +232,46 @@ export const Detail = forwardRef<DetailHandle, DetailProps>(({
 
   const isDark = theme === 'dark';
 
+  // If detailed tutorial is requested, show full tutorial screen
+  if (showDetailedTutorial && detailedTutorial) {
+    return (
+      <DetailedTutorialView
+        tutorial={detailedTutorial}
+        isDark={isDark}
+        onBack={() => setShowDetailedTutorial(false)}
+        onToggleTheme={onToggleTheme}
+      />
+    );
+  }
+
+  if (currentStageKey === 'writeRun' && lessonData.writeRun) {
+    return (
+      <div
+        className={`fixed inset-0 z-40 w-full h-full h-[100dvh] max-h-[100dvh] overflow-hidden flex flex-col items-center justify-center p-0 select-none ${
+          isDark ? 'bg-[#06080e]' : 'bg-[#0f141f]'
+        }`}
+      >
+        <WriteRun
+          data={lessonData.writeRun}
+          topicTitle={lessonData.topicTitle}
+          isDark={isDark}
+          revealStep={writeRunRevealStep}
+          setRevealStep={setWriteRunRevealStep}
+          userCode={userCode}
+          setUserCode={setUserCode}
+          hasRunCode={hasRunCode}
+          setHasRunCode={setHasRunCode}
+          actualOutput={actualOutput}
+          setActualOutput={setActualOutput}
+          onRunCode={handleRunCode}
+          onContinue={handleNextStage}
+          onBack={handlePreviousStage}
+          nextStageLabel={nextStageLabel}
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       className={`min-h-screen w-full flex flex-col items-center select-none pb-2 transition-colors duration-300 ${
@@ -306,7 +286,7 @@ export const Detail = forwardRef<DetailHandle, DetailProps>(({
             : 'bg-white/95 backdrop-blur-md border-slate-200/90 shadow-[0_2px_8px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]'
         }`}
       >
-        <div className="w-full max-w-md mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="w-full max-w-2xl mx-auto px-2 sm:px-4 h-14 flex items-center justify-between">
           {/* Back button -- matches the shared Header's back button used on Listing */}
           <button
             aria-label="Go back"
@@ -430,10 +410,10 @@ export const Detail = forwardRef<DetailHandle, DetailProps>(({
       </header>
 
       {/* Main Content Area */}
-      <div className="w-full max-w-md px-4 pt-3 flex flex-col">
+      <div className="w-full max-w-2xl mx-auto px-1.5 sm:px-3 pt-2 flex flex-col">
         {/* ================= PROGRESS STRIP (SHOWS LESSON NAME + STEP PROGRESS) ================= */}
         <section
-          className={`mb-4 flex items-center justify-between px-4 py-2.5 rounded-2xl border transition-all ${
+          className={`mb-3 flex items-center justify-between px-3 py-2 rounded-xl border transition-all ${
             isDark
               ? 'bg-[#171b26] border-[#262c3d] shadow-sm'
               : 'bg-white/90 backdrop-blur-sm border-slate-200/80 shadow-sm'
@@ -448,6 +428,24 @@ export const Detail = forwardRef<DetailHandle, DetailProps>(({
             >
               {lessonData.topicTitle}
             </span>
+            {detailedTutorial && (
+              <button
+                type="button"
+                onClick={() => {
+                  soundFX.playClick();
+                  setShowDetailedTutorial(true);
+                }}
+                className={`ml-1.5 px-2 py-0.5 rounded-full text-[10px] font-['Outfit'] font-bold flex items-center gap-1 cursor-pointer transition-all active:scale-95 shrink-0 ${
+                  isDark
+                    ? 'bg-indigo-950/80 text-indigo-300 hover:bg-indigo-900 border border-indigo-700/50'
+                    : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200'
+                }`}
+                title="Open Detailed Tutorial"
+              >
+                <span className="material-symbols-outlined text-[12px]">auto_stories</span>
+                <span className="hidden sm:inline">Tutorial</span>
+              </button>
+            )}
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
             {activeStages.map((key, idx) => {
@@ -482,8 +480,12 @@ export const Detail = forwardRef<DetailHandle, DetailProps>(({
             revealStep={learnRevealStep}
             setRevealStep={setLearnRevealStep}
             onContinue={handleNextStage}
-            renderSnippetLine={renderSnippetLine}
             nextStageLabel={nextStageLabel}
+            tapToRevealEnabled={tapToRevealEnabled}
+            lessonId={lessonData.id}
+            topicTitle={lessonData.topicTitle}
+            onOpenTutorial={() => setShowDetailedTutorial(true)}
+            hasTutorial={!!detailedTutorial}
           />
         )}
 
@@ -514,26 +516,6 @@ export const Detail = forwardRef<DetailHandle, DetailProps>(({
             setActivePredictCardIdx={setActivePredictCardIdx}
             onSelectOption={handleSelectPredictOption}
             scrollToElement={scrollToElement}
-            onContinue={handleNextStage}
-            nextStageLabel={nextStageLabel}
-          />
-        )}
-
-        {/* ================= WRITE & RUN (only when this lesson uses it) ================= */}
-        {currentStageKey === 'writeRun' && lessonData.writeRun && (
-          <WriteRun
-            data={lessonData.writeRun}
-            topicTitle={lessonData.topicTitle}
-            isDark={isDark}
-            revealStep={writeRunRevealStep}
-            setRevealStep={setWriteRunRevealStep}
-            userCode={userCode}
-            setUserCode={setUserCode}
-            hasRunCode={hasRunCode}
-            setHasRunCode={setHasRunCode}
-            actualOutput={actualOutput}
-            setActualOutput={setActualOutput}
-            onRunCode={handleRunCode}
             onContinue={handleNextStage}
             nextStageLabel={nextStageLabel}
           />

@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { Stage3PredictData } from '../data/lessonStagesData';
 import { soundFX } from '../utils/audio';
+import { renderKotlinCodeLines } from '../utils/codeHighlighter';
+import { renderVisibleWhitespace } from '../utils/outputDisplay';
 
 interface PredictStageProps {
   data: Stage3PredictData;
@@ -424,7 +426,7 @@ export const Predict: React.FC<PredictStageProps> = ({
                   e.stopPropagation();
                   handleCardClick(qIdx);
                 }}
-                className={`w-full rounded-2xl p-5 border flex flex-col gap-4 transition-all duration-300 animate-fadeIn ${
+                className={`w-full rounded-2xl p-3.5 sm:p-5 border flex flex-col gap-3.5 transition-all duration-300 animate-fadeIn ${
                   activePredictCardIdx === qIdx
                     ? isDark
                       ? 'bg-[#171b26] border-indigo-500/40 shadow-lg'
@@ -478,34 +480,9 @@ export const Predict: React.FC<PredictStageProps> = ({
                   }`}
                 >
                   <pre className="font-mono text-xs leading-relaxed">
-                    {question.code.map((line, idx) => (
+                    {renderKotlinCodeLines(question.code, { isDark }).map((node, idx) => (
                       <div key={idx} className="whitespace-pre">
-                        {line.startsWith('fun ') ? (
-                          <>
-                            <span className="text-purple-500 font-semibold">fun </span>
-                            <span className="text-indigo-500 font-semibold">
-                              {line.substring(4, line.indexOf('(') > -1 ? line.indexOf('(') : undefined)}
-                            </span>
-                            <span>{line.substring(line.indexOf('(') > -1 ? line.indexOf('(') : 4)}</span>
-                          </>
-                        ) : line.trim().startsWith('val ') ? (
-                          <>
-                            <span className="text-purple-500 font-semibold">val </span>
-                            <span>{line.trim().substring(4)}</span>
-                          </>
-                        ) : line.trim().startsWith('var ') ? (
-                          <>
-                            <span className="text-amber-500 font-semibold">var </span>
-                            <span>{line.trim().substring(4)}</span>
-                          </>
-                        ) : line.includes('println') ? (
-                          <span>
-                            <span className="font-semibold text-indigo-400">println</span>
-                            {line.substring(line.indexOf('println') + 7)}
-                          </span>
-                        ) : (
-                          <span>{line}</span>
-                        )}
+                        {node}
                       </div>
                     ))}
                   </pre>
@@ -563,7 +540,9 @@ export const Predict: React.FC<PredictStageProps> = ({
                           >
                             {opt.id}
                           </span>
-                          <span className="text-sm font-medium">{opt.label}</span>
+                          <span className="text-sm font-medium whitespace-nowrap overflow-x-auto">
+                            {renderVisibleWhitespace(opt.label)}
+                          </span>
                         </div>
                         {isSelected && (
                           <span
@@ -643,7 +622,7 @@ export const Predict: React.FC<PredictStageProps> = ({
             : 'bg-gradient-to-t from-[#f1f4f9] via-[#f1f4f9]/95 to-transparent'
         }`}
       >
-      <div className="max-w-md mx-auto px-4">
+      <div className="max-w-2xl mx-auto px-2 sm:px-4">
         {!isFullyRevealed ? (
           /* Minimalist Tap Hint positioned nicely above bottom edge. The wrapper (not just the
               pill) also carries the click handler and extra vertical padding so taps slightly
