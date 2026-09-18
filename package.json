@@ -9,6 +9,8 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "audit:output-quotes": "node scripts/audit-output-quotes.mjs",
+    "test:world11-content": "tsx scripts/test-world11-content.ts",
+    "test:lambda-runner": "tsx scripts/test-lambda-runner.ts",
     "update-progress": "node scripts/update-data-gathering-progress.mjs",
     "lint": "tsc --noEmit"
   },
@@ -16,6 +18,7 @@
     "@capacitor/android": "^8.5.1",
     "@capacitor/app": "^8.1.1",
     "@capacitor/cli": "^8.5.1",
+    "@capacitor/clipboard": "^8.0.1",
     "@capacitor/core": "^8.5.1",
     "@google/genai": "^2.4.0",
     "@tailwindcss/vite": "^4.1.14",
