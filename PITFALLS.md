@@ -748,3 +748,711 @@ directly (`transpileOOPDeclarations` was temporarily exported for this,
 then reverted) to see exactly what JS a given piece of Kotlin produced.
 Reading the regex/string-building code was not enough to predict any of
 these three failures.
+
+## Function values: parse scopes before lowering to JavaScript
+
+The function/lambda pass now lives in `src/utils/kotlinFunctions.ts`. Do not
+restore the old single-line lambda regexes: they lose multiline bodies, nested
+function signatures, lexical receivers, and the destination of a return.
+
+Supported and regression-tested behavior includes:
+
+- Multiline/multiple-statement lambdas, closures, nested `it`, last-expression
+  results (including `if` and subject-based `when`), and trailing lambda calls.
+- Anonymous functions with expression or block bodies, local early returns,
+  inferred parameters in a typed context, and receiver functions.
+- Nested, nullable, named-parameter, receiver, and aliased function types;
+  function arguments/results; ordinary and `invoke` calls; generic higher-order
+  examples. A nullable function type differs from a nullable return type.
+- Top-level/local, bound/unbound member, constructor, and extension function
+  references. A bound receiver is evaluated once and retains that instance.
+- Implicit and explicit return labels; non-local returns through supported
+  standard inline callbacks and user-defined inline function parameters.
+  `noinline` and `crossinline` disallow non-local returns. Anonymous functions
+  establish their own ordinary-return boundary.
+- Basic function-signature checks before execution: known parameter/result
+  types, argument/parameter counts, function-reference compatibility, nullable
+  invocation, and invalid return targets. Diagnostics retain source line numbers.
+
+Non-local returns use per-invocation target objects. Only the matching lexical
+boundary catches its return; other boundaries rethrow it. User catch blocks must
+also rethrow these internal transfers, while finally blocks still run. Never
+replace a non-local return with a JavaScript callback's ordinary `return`.
+
+Verification:
+
+- `npm run test:lambda-runner` checks valid results and compiler-style rejections.
+- `npm run test:lambda-kotlin` independently compiles/runs the shared fixtures
+  with real Kotlin. Set `KOTLIN_COMPILER_CLASSPATH` to an installed Kotlin JVM
+  compiler and its dependency JARs; optionally set `KOTLIN_RUNTIME_CLASSPATH`.
+  This test does not install or download a compiler.
+- Existing Stage 4 and typing/program suites exercise the rest of the runner.
+
+This remains a browser teaching runner. The signature checks do not implement
+Kotlin's complete type system, overload resolution, reflection, suspend functions,
+or JVM inlining/performance. Do not grade those compiler/runtime guarantees as
+if they were simulated. Execute each new lesson's particular code before marking
+it supported in `CodeDo_Editor_capacity_per_lesson_status.xlsx`. The deleted
+`CODEDO_EDITOR_CAPACITY.md` must not be recreated as a second capacity tracker.
+
+### World 10 collections
+
+#### Re-audit: trailing-lambda Map producers were not recognized for bracket lookup
+
+The runner identifies variables initialized by `groupBy`/`associate` so Kotlin
+`groups[key]` becomes JavaScript `groups.get(key)`. That detector required an
+opening parenthesis after the operation name. Idiomatic Kotlin normally writes
+`items.groupBy { ... }`, so the result printed as a valid Map while a following
+String-key bracket lookup silently returned null through JavaScript property
+access. In `groups["key"]?.sum() ?: 0`, it ran successfully and printed a
+plausible but wrong zero.
+
+Accept either `(` or `{` after Map-producing collection operations. The World
+10 exact-output audit exercises grouped String keys in a filter/group/sum
+pipeline; real-Kotlin comparison verifies the same values. Keep Map-result
+detection in sync with every supported trailing-lambda Map producer.
+
+Use `KotlinList` for list factories and transformation results so chained operations retain Kotlin behavior. Do not reinstall collection helpers on native Array.prototype. Pair is an iterable object with `.first`/`.second`; JS Map constructors require conversion to two-element arrays. Partition must evaluate its predicate once per element. Validate chunk/window size and step before entering synchronous loops.
+
+Run `npm run test:collection-runner`; optionally compare the shared fixtures against a local Kotlin compiler with `npm run test:collection-kotlin`. See [WORLD_10_CAPACITY_AUDIT.md](WORLD_10_CAPACITY_AUDIT.md) for numeric type filtering, equality, formatting and content-coverage limits. Keep those limits in the existing XLSX tracker.
+
+## `toFloat()` printed raw float32-rounding noise instead of Kotlin's shortest decimal
+
+Found while fixing World 1's Float & Double lesson (`WORLD_1_CONTENT_REVIEW.md`
+finding W1-06): `Number.prototype.toFloat` returned `Math.fround(Number(this))`
+directly -- the nearest true 32-bit float value, but as a raw JS double. JS has
+no separate float32 printing path, so `println`ing that value showed the
+double's full decimal expansion of the float32 approximation (e.g.
+`19.989999771118164` for `19.99`), while real Kotlin's `Float.toString()`
+prints the shortest decimal that round-trips to the same float32 (`19.99`).
+Any `writeRun`/`debug` exercise built around a `.toFloat()` conversion would
+have graded byte-for-byte-correct Kotlin as wrong, exactly like the `Int / Int`
+truncation bug above.
+
+Fixed by rounding to 7 significant digits (float32's precision ceiling) before
+converting back to a plain number: `Number(Math.fround(Number(this)).toPrecision(7))`.
+This isn't a full shortest-round-trip algorithm (real Kotlin/Java's
+`Float.toString` is more precise about it for edge cases), but it reproduces
+the expected output for the lesson-scale values this app's content actually
+uses. If a future lesson needs a Float value where this heuristic visibly
+diverges from real Kotlin, verify with `compileAndRunKotlin` before shipping,
+the same as every other numeric-formatting entry on this page.
+
+## `kotlinFunctions.ts` has its OWN tokenizer, and it split decimal literals into three tokens
+
+Found while auditing World 2 (Operator Forge)'s Arithmetic Operators lesson:
+an Explore card's `println(a / 2.0)` (Int variable divided by a Double
+literal, meant to demonstrate Double-promotion -- the exact opposite of Int
+truncation) failed with `Runtime error: missing ) after argument list`.
+
+Root cause: `kotlinFunctions.ts` (the function/lambda lowering pass) does
+**not** reuse `kotlinSource.ts`'s shared `scanKotlin` tokenizer -- it has its
+own private `lex()`, and that lexer's numeric-literal handling was folded
+into the generic alnum-run branch (`/[A-Za-z_0-9]/`), which stops at the
+first non-alphanumeric character. Since `.` isn't in that character class,
+`2.0` tokenized as THREE separate tokens: `2`, `.`, `0` -- unlike
+`scanKotlin`, which already scans a decimal literal as one token. This
+silently broke the Int/Long division-truncation check a few lines later
+(`kotlinFunctions.ts` has its own, independent copy of that logic, separate
+from `kotlinRunner.ts`'s `wrapIntDivision` -- see the entry above; the two
+never shared an implementation): the check only looks at the token
+immediately after `/`, expecting either a real number token or an
+Int/Long-typed variable, and a bare `2` (the split-off integer part) matched
+`/^\d+$/` and got wrapped as `Math.trunc(a / 2)`, with the literal `.0` from
+the original source left dangling right after -- `Math.trunc(a / 2).0`, a
+syntax error the moment ANY Int variable was divided by an inline Double
+literal like `2.0` (dividing by a Double VARIABLE, or by an Int variable,
+never hit this, since both of those are still single tokens either way --
+that's exactly why this had never been caught until an Explore example
+happened to use this precise shape).
+
+Fixed by giving `lex()` its own numeric-literal branch (checked before the
+generic alnum branch), scanning the same shape `scanKotlin` does: optional
+digit-group separators, an optional decimal part guarded by `(?!\.)` (so a
+range like `5..10` still tokenizes as `5`, `..`, `10`, not `5.` followed by
+garbage), an optional exponent, and an optional type suffix.
+
+**Rule, reinforced:** this file has TWO independent tokenizers
+(`kotlinSource.ts`'s `scanKotlin`, shared broadly, and `kotlinFunctions.ts`'s
+private `lex()`) and TWO independent Int/Long division-truncation
+implementations (`kotlinRunner.ts`'s `wrapIntDivision`, string/regex-based,
+and `kotlinFunctions.ts`'s token-based one at the bottom of `lower()`). A
+fix to one does NOT automatically cover the other -- when touching numeric-
+literal handling or division-truncation logic, grep for both
+implementations and verify both with `compileAndRunKotlin`, specifically
+including the case of an Int identifier divided by an inline Double literal
+(`a / 2.0`), not just two bare identifiers or two bare literals.
+
+**Immediate follow-up regression from the fix above, in the same file:**
+fixing `lex()` to scan a decimal literal as one token broke a SEPARATE piece
+of logic that had been silently depending on the old three-token split:
+`infer()`'s numeric-literal branch detected `Double` by checking
+`top(a, b, '.') >= 0` -- "is there a standalone `.` token in this range" --
+which only ever found one because the old lexer bug happened to produce a
+literal `.` token between the two half-tokens of a decimal literal. Once
+`lex()` correctly emitted `10.0` as ONE token, that standalone `.` token no
+longer existed, so `top(a, b, '.')` always returned -1 and every decimal
+literal was misclassified as `Int`. This silently broke `__kt_decimalText`
+formatting (see the "Kotlin `Int / Int` division never truncated" pitfall
+above for that helper) for EVERY bare Double reference -- `val total = 10.0;
+println(total)` printed `10`, not `10.0` -- and, far more visibly, broke
+compound assignment on an explicitly-typed Double var entirely: `var total:
+Double = 10.0; total *= 1.5` raised `Compilation error: Type mismatch:
+expected Double, got Int`, because the RHS of the compound assignment was
+also misinferred as Int against the declared Double type. Fixed by checking
+the literal's own source text for a decimal point (`/\.\d/.test(text(a,
+b))`) instead of hunting for a top-level `.` token that no longer exists.
+
+**Rule, reinforced again, harder this time:** a fix to a tokenizer is not
+"done" once the bug it targeted is verified fixed -- grep every OTHER place
+in the same file that inspects token structure (`top(...)`, token-count
+comparisons like `a + 1 === b`, etc.) for anything that might have been
+unknowingly relying on the exact SHAPE of tokens the old (buggy) tokenizer
+produced. This is why `WORLD_1_CONTENT_REVIEW.md`/`WORLD_2_CONTENT_REVIEW.md`
+authoring now specifically tests bare `var`/`val` Double references and
+compound assignment on a Double, not just Double arithmetic expressions --
+the arithmetic-expression case alone did not surface this regression, since
+`infer()`'s `+`/`-`/`*`/`/` branches recurse into their operands rather than
+re-checking `top(a, b, '.')` themselves.
+
+## `mutableMapOf(...).remove(key)` was never synthesized, unlike Set's `.remove()`
+
+Found while auditing World 6 (Collection Valley). The "Finishing World 6"
+entry above documents adding `.remove(item)` to `mutableSetOf` results,
+delegating to `Set.prototype.delete` -- but the equivalent method was never
+added to `mutableMapOf` results. `withMapChecks` only ever added
+`containsKey`/`containsValue`/`isEmpty`, so `scores.remove("Tom")` on a
+`mutableMapOf` result threw `scores.remove is not a function`, even though
+this is completely ordinary, commonly-taught Kotlin (`MutableMap.remove`
+deletes the entry for a given key). This is exactly the kind of loud,
+easy-to-miss-until-you-actually-run-it capability gap this file exists to
+catch -- it went unnoticed because no lesson content had exercised Map
+removal until this audit pass tried to add it.
+
+Fixed by giving `__kt_mutableMapOf`'s result its own `.remove(key)`,
+delegating to `Map.prototype.has`/`.get`/`.delete` (mirroring Kotlin's own
+`remove` semantics: return the removed value, or null if the key wasn't
+present) rather than JS's native `Map.prototype.delete` directly, which is
+differently named and returns a boolean instead of the removed value.
+Scoped to `__kt_mutableMapOf`'s own returned instance only -- `__kt_mapOf`
+(the read-only factory) still has no `.remove` at all, correctly matching
+that real Kotlin's read-only `Map` has no such method either. Verified a
+read-only `mapOf(...).remove(...)` call still fails, and a
+`mutableMapOf(...).remove(...)` call now both removes the entry and
+returns the correct leftover map.
+
+## Escaped `\$` inside a string template was wrongly turned into `${identifier}`
+
+Found while auditing World 1's String Templates lesson against the new
+"commonly used features" rule in `LESSON_QUALITY_STANDARD.md`: the lesson's
+own Learn section teaches escaping a literal dollar sign with `\$` (e.g. so
+`"Price: \$price"` prints the literal text `Price: $price`, not an
+interpolated value) but had no Explore/Predict exercising it -- and
+attempting to add one immediately surfaced that the engine got it wrong:
+`println("Price: \$price")` printed `Price: ${price}` (with literal curly
+braces!) instead of `Price: $price`.
+
+Root cause: `transpileKotlinToJS`'s string-template transform
+(`inner.replace(/\$([a-zA-Z_][a-zA-Z0-9_]*)/g, '${$1}')`) blindly wraps
+every `$identifier` it finds in `${...}`, with no awareness that a
+preceding backslash means Kotlin's own escape for a literal dollar rather
+than an interpolation marker. So `\$price` (backslash, dollar, "price")
+became `\${price}` in the generated JS template literal. JS's OWN escape
+rules for `\$` (escaping only the dollar, not a following `{`) then kicked
+in: since a literal `{` immediately followed the escaped `$`, JS printed
+the `$` as literal text but rendered `{price}` as its own literal text too
+(no interpolation, since the `$` right before it was already consumed as
+an escape) -- producing the wrong `${price}` instead of correctly leaving
+`price` as ordinary trailing text with no braces at all.
+
+Fixed with a negative lookbehind, `(?<!\\)\$([a-zA-Z_][a-zA-Z0-9_]*)`, so a
+backslash-escaped `$identifier` is left completely untouched by this
+transform. This works because JS's own template-literal escaping already
+treats a bare `\$` (not followed by `{`) as producing a literal `$`
+character with no further special handling of what follows it -- so once
+this transform stops adding synthetic braces, the pre-existing backslash
+already produces the exact right output on its own, with zero extra code
+needed for the "already correctly escaped" case.
+
+**Rule, reinforced:** this bug was found specifically because the new
+"commonly used features" rule requires testing a feature the Learn section
+itself claims to teach (`\$` escaping) rather than stopping once the
+lesson's *existing* Explore/Predict examples all pass. A lesson's Learn
+prose describing a behavior is not evidence that the behavior actually
+works in this simulator -- run it through `compileAndRunKotlin` before
+authoring an Explore/Predict example around it, the same as every other
+entry on this page.
+
+## Named arguments silently reordered wrong instead of failing or working
+
+Found while auditing World 5 (Function Forge)'s Named Arguments lesson.
+Every prior note about this feature (see the "Functions needed real engine
+support before World 5" entry above) said named arguments at a call site
+were simply **not transpiled** -- meaning code using them should either be
+confined to non-executed Learn/Predict text or avoided in
+`writeRun`/`debug`. In practice the engine did something worse: it silently
+ran `move(y = 4, x = 2)` and printed `4, 2` -- treating the WRITTEN order of
+the named arguments as if it were plain positional order, completely
+ignoring the `x =`/`y =` labels, instead of either reordering correctly
+(`2, 4`) or failing loudly. This is exactly the "plausible-looking wrong
+answer" failure mode this file warns about repeatedly, and it slipped past
+World 5's own audit script because that script only checked that Explore
+cards ran *successfully*, never that their output was actually correct.
+
+Root cause: `kotlinFunctions.ts`'s named-argument reordering logic already
+existed, but the `names` array driving it (the ordered list of parameter
+names a `paramName = value` argument gets matched against) was populated
+**only** for two hardcoded collection helpers, `windowed` and `chunked`
+(`collectionNames[info.name]`, gated on a leading `.` receiver call) --
+never for an ordinary user-defined function. So for any regular function, the
+"is this argument named?" branch never activated, and each argument's full
+source text (including the `paramName = ` prefix) got passed straight
+through to `lower(...)` as a plain expression. `y = 4` and `x = 2` are each
+independently valid JS assignment expressions (assigning to a same-named
+identifier and evaluating to the assigned value), so `move(y = 4, x = 2)`
+transpiled to something that behaved like `move(4, 2)` -- silently correct
+looking JS, silently wrong Kotlin semantics.
+
+Fixed by also populating `names` from the callee's own declared parameter
+list (`info.signature?.params.map(p => p.name)`) for an ordinary function
+call, reusing the same reordering logic already in place for
+windowed/chunked. Unfilled positions (a caller relying on a default value)
+are left as the literal string `'undefined'` rather than reconstructed from
+each parameter's own default-value expression -- a user-defined function is
+already transpiled with real JS default parameters (see where `fun`
+declarations are lowered), and JS applies those defaults itself whenever it
+receives an `undefined` argument, so no separate default-lookup is needed.
+Verified against reordered args, labeled same-type args, mixed positional +
+named args, and a named call that omits a defaulted parameter -- all now
+match real Kotlin. Also verified zero regressions across the full existing
+test suite (all five worlds' audit scripts, lambda-runner, collection-
+runner, World 11 content).
+
+**Rule, reinforced:** an Explore/Predict card that merely *runs without
+throwing* is not proof it teaches the right thing -- add an explicit
+expected-output assertion (not just a success/failure check) for any
+example whose entire teaching point is a specific printed value, the same
+way `writeRun`/`debug` are already checked against `expectedOutput`. This
+bug would have been caught immediately by such a check; it was invisible to
+a check that only asks "did it crash."
+
+## World 7 audit: null operators need expression boundaries, not line regexes
+
+The earlier “World 7 ... building from zero” entry describes the original
+implementation. Its one-assertion-per-line limit and direct Elvis substitution
+are superseded by this audit's token-based lowering in `kotlinFunctions.ts`.
+
+**High — silently wrong output.** A safe call used directly in println printed
+`null`, but storing it and interpolating/concatenating it printed `undefined`.
+The old formatter normalized only final print arguments; JavaScript had already
+converted undefined into part of a string before that formatter ran. Safe-call
+expression results now coalesce to actual null before composition, and template
+expressions use the shared Kotlin value formatter. Tests cover direct printing,
+stored results, `$value`, `${receiver?.length}` and concatenation.
+
+**High — Elvis precedence.** Replacing `?:` with `??` did not preserve Kotlin's
+precedence relative to comparisons and Boolean operators. `n ?: 0 > 1` with
+n=2 printed `2` instead of `true`; mixing Elvis with || could fail JS parsing.
+The function lowerer now splits expressions at token/delimiter boundaries and
+emits explicit grouping. Elvis fallback functions remain lazy. A declaration
+such as `val text = name ?: return 0` now lowers to a value assignment followed
+by a null guard and the existing scoped return handling. This adds the ordinary
+guard-return form; it is not a claim to implement every throw/return expression.
+
+**High — assertions and casts bound to the wrong operand.** The line regex
+could not handle two `!!` uses, quoted map indices, or function-call receivers.
+Assertions now wrap the complete postfix expression; independent/chained uses,
+left-associative arithmetic and integer division are regression-tested. A null
+assertion still throws, including when it is the second assertion on a line.
+The old safe-cast regex also repeated its operand and could not parse a function
+call. The replacement evaluates that operand once using a local lambda value.
+
+**High — a numeric safe cast silently converted the wrong type.** All numeric
+targets previously used typeof number, so `val x: Any = 2.5; x as? Int` returned
+2.5 instead of null. For statically known immutable primitive values, the
+lowerer retains the initializer's type and distinguishes numeric targets.
+Numeric safe casts from mutable or erased/unknown sources are explicitly
+rejected; this is an editor limit, not a Kotlin restriction. Char targets and
+known Char-to-String safe casts also fail explicitly rather than pretending
+that JS string values preserve Kotlin Char identity. Full runtime type tagging,
+generic casts and comprehensive flow analysis are still not implemented.
+
+**High — a known null numeric value acted like zero.** `val n: Int? = null;
+println(n + 1)` printed 1. The lowerer now rejects arithmetic and unguarded
+member access on tracked known-null locals, with guards for the checked branch
+and ordinary short-circuit forms. This is a limited diagnostic improvement, not
+full Kotlin smart-cast verification for arbitrary parameters, aliases, mutable
+properties or callbacks. Language explanations must describe Kotlin's compile-
+time rejection, even where the simulator's remaining checks are incomplete.
+
+Verification: `npm run audit:world7-quality` compares exact Learn/Explore/Predict
+outcomes, all writing/debugging pairs, and `null-safety-runner-cases.ts` boundary
+probes. `test:world7-kotlin` optionally checks these against a local compiler.
+Never replace these output assertions with success-only checks: that would
+reintroduce the blind spot which hid the interpolation, Elvis and cast defects.
+
+## World 8 audit: a class was never type-compatible with the interface it implements
+
+Auditing World 8's Interfaces lesson found `interfaces-explore-3` -- an
+entirely ordinary, correct piece of Kotlin (`fun announce(g: Greetable)`
+called as `announce(p)` where `p: Person` and `class Person(...) :
+Greetable`) -- failing with `Compilation error: Type mismatch: expected
+Greetable, got Person`. Root cause in `kotlinFunctions.ts`: the loose
+class/class name-compatibility check `compatible()` uses to avoid rejecting
+valid calls only ever consults a `classes: Set<string>` populated by `class`
+declarations; `interface` declarations were never added to that same set,
+so a class name and the interface it implements were never recognized as
+compatible at all. Fixed with a one-line addition right after the existing
+`class` registration: `if (at(i) === 'interface') classes.add(at(i + 1));`
+-- interfaces now register into the exact same set the class/class check
+already treats as mutually compatible. This is not real subtype
+tracking -- like the pre-existing class/class case, it just treats any two
+known declared type names as compatible -- but it's enough to stop a valid
+implements-and-passes-as-the-interface-type call from being wrongly
+rejected. Verified via `compileAndRunKotlin` (the exact failing call now
+prints `Hi, I'm Zoe`) and the full existing regression suite (Worlds 1, 5,
+6, 7, lambda-runner, collection-runner, World 11 content, `tsc --noEmit`)
+-- zero regressions.
+
+**Same audit, a content-only finding, not an engine bug:** all 12 of World
+8's lessons with both a Write & Run and a Debug stage had `debug.fixedCode`
+byte-for-byte identical to their own `writeRun.solutionCode` -- the same
+systemic issue already found and fixed in Worlds 4, 5, 6, and 7 (see
+`LESSON_QUALITY_STANDARD.md` section 2's rule against this). Every one of
+Classes, Objects, Properties, Methods, Constructors, Primary Constructors,
+Data Classes, Enums, Basic Inheritance, Interfaces, Overriding Members, and
+the Boss was affected -- the worst case of any world audited so far (100%
+of the eligible lessons, versus 9/10 for World 6 and smaller counts
+elsewhere). Fixed the same way as every prior instance: gave each Debug
+exercise its own scenario (different class/variable names, values, and in
+several cases domain) while keeping the exact bug mechanism the lesson
+already taught (swapped constructor property order, reading an undeclared
+property, subtract-instead-of-add, a missing multiplication factor, reading
+`this.param` instead of the bare constructor parameter, a missing `val`,
+a missing `data` keyword, wrong enum constant arguments, a wrong operator
+inside an override, an unexplained subtraction inside an override, a
+missing `override` entirely, and the Boss's off-by-boundary `>` vs `>=`
+comparison). Verified every new scenario individually via
+`compileAndRunKotlin` before editing, then confirmed zero remaining
+duplicates with a `writeRun.solutionCode`/`debug.fixedCode` comparison
+script across all of World 8, `npm run audit:world8-quality` (42 examples,
+42 predictions, 52 execution checks, all passing), and the same full
+cross-world regression suite as above.
+
+## Trailing lambdas with explicit parameter arrows were mistakenly emitted as literal lambdas instead of attaching to the call site
+
+Found while auditing World 9 (Lambda Lab): `return@forEach` inside a trailing lambda with an explicit parameter arrow (`items.forEach { item -> if (item < 0) return@forEach; println(item) }`) failed to compile with `Compilation error: Unresolved return label: forEach`.
+
+Root cause: in `src/utils/kotlinFunctions.ts`, the lowering loop emits lambda expressions through two branches:
+1. `trailing` (a lambda immediately trailing a function/method call), which assigns the callee's name (`forEach`, `filter`, etc.) as the implicit label for labelled returns (`return@forEach`).
+2. `literal` (a standalone lambda expression `{ ... }`).
+
+When a lambda contained an explicit parameter arrow (`item ->`), the lookup checked `literal` before `trailing`, or the condition matched `literal` because both `trailing` and `literal` records were indexed by opening brace. Because `literal` was selected over `trailing`, the engine emitted the lambda as a standalone function value rather than associating it with the enclosing call. Consequently, the call's name was never registered as an active label in the lambda's lexical scope, causing `return@forEach` to be rejected as an unresolved return label.
+
+Fixed in `src/utils/kotlinFunctions.ts` by prioritizing `trailing` lambdas over `literal` lambdas when both match a token index (`const lambda = trailing ?? literal`). This ensures trailing lambdas with explicit parameter arrows are correctly associated with their call site, allowing implicit labels like `@forEach` to resolve properly. Verified via `npm run test:lambda-runner` (119/119 passing), `npm run audit:world9-quality`, and cross-world regression tests.
+
+
+## World 9 re-audit: constructor-expression references are bound
+
+`val action: (Int) -> Int = Scale(3)::apply` was rejected as if its type
+were `(Scale, Int) -> Int`. The inference pass identified an unbound
+reference merely because the receiver started with a class name; lowering
+correctly treated the full constructor expression as an instance. Require
+`::` immediately after the type token when inferring an unbound receiver,
+matching the lowering decision. `Scale::apply` still takes the instance as
+an argument; `Scale(3)::apply` captures the constructed instance. Regression:
+`constructor expression produces a bound member reference` in
+`lambda-runner-cases.ts`, plus the authored World 9 member-reference prediction.
+
+### World 9 inline-parameter validation: storing and capturing require modifiers
+
+The runner checked forbidden non-local returns at call sites but accepted
+`inline fun keep(action: () -> Unit): () -> Unit { return action }` without
+`noinline`, and accepted capturing plain `action` inside a stored helper
+lambda without `crossinline`/`noinline`. Real Kotlin rejects both.
+
+Track an inline parameter's declaring function frame and modifier in lexical
+type context. Reject using an inlinable parameter as a standalone stored or
+returned value; require `noinline`. Reject invoking an ordinary inline
+parameter across a non-inline function/lambda boundary; allow `crossinline`.
+Forwarding to compatible inline parameters remains supported; forwarding to
+an ordinary/noinline parameter needs a storable callback. Regression cases
+live in `scripts/world9-inline-validation-cases.ts`, and both the World 9
+runner audit and real-Kotlin reference test require compilation rejection.
+This is scoped validation of these forms, not complete Kotlin escape analysis.
+
+## Content rule: lesson code arrays must be properly formatted, not semicolon-crammed
+
+Found repeatedly across World 11's audit (six separate lessons): an
+Explore/Predict `code` array entry that squeezes multiple class/object
+members onto one physical line with `;` (e.g. `class Counter{var n=0;private
+set;fun inc(){n++}}`) is not just hard to read -- it silently breaks
+execution. `splitClassMembers` in `kotlinRunner.ts` divides a class/object
+body into members by scanning **line by line**, matching a new member only
+when a line trimmed-starts with `val`/`var`/`fun`/`init`/`constructor`. Every
+member after the first on a semicolon-joined line is invisible to this scan
+and gets absorbed into the previous member's body text instead of being
+recognized as its own declaration, producing anything from a silent wrong
+answer to a hard parse failure -- and the *exact same code*, reformatted
+onto separate lines with no other change, works correctly.
+
+The same failure mode also hit a `when(s) { A->0;is B->s.n }` single-line,
+semicolon-joined branch list (`parseWhenBranches` also only split on
+newline until fixed) and a `by lazy { stmt1; stmt2 }` single-line lazy
+block. All three were fixed by teaching the respective parser to also split
+on top-level `;`, but new lesson content should not rely on that -- write
+every class/object body, `when` branch list, and `lazy`/other block body
+across real lines from the start, matching this file's own multi-line
+style everywhere else. This is now a standing authoring rule, not just a
+one-off fix: see `LESSON_QUALITY_STANDARD.md` section 4's formatting
+paragraph, and check any newly authored `code`/`codeSnippet` array against
+it before shipping, the same way every other pitfall on this page insists
+on running the code rather than reading it.
+
+## `insertNewForInstantiation` corrupted a class name that appeared inside an unrelated string literal
+
+A generic class's own method building a display string, `"Wrapped(" +
+value + ")"`, got silently corrupted into `"new Wrapped(" + value + ")"`.
+`insertNewForInstantiation` (`kotlinRunner.ts`) is the final pass that
+inserts `new` before every `ClassName(` occurrence in the whole source, but
+it was a blind whole-string regex replace with no idea whether a given
+match sat inside an actual instantiation or inside a string literal that
+merely happened to contain the same text. Any Kotlin string literal
+containing `"<SomeKnownClassName>("` -- not just a `toString()`-style
+override (already worked around by building those via concatenation, see
+the data-class `toString()` pitfall above) but *any* ordinary string a
+method returns -- was silently corrupted the same way.
+
+Fixed by restricting the replace to non-string chunks of each line, reusing
+`splitCodeAndStrings` (the same string/code split `rewriteClassPropertyAccess`
+already uses) instead of running the regex over raw, undifferentiated
+source text. If you add another whole-source text transform to this file,
+check whether it needs the same string-literal exclusion before assuming a
+plain global regex replace is safe.
+
+## World 12 (Generic Realm): generic class/interface names with `<...>` broke parsing wherever they appeared
+
+Building World 12 surfaced a cluster of bugs, all variations on the same
+theme: earlier code (`kotlinRunner.ts`'s class/interface/object regexes,
+and `kotlinFunctions.ts`'s type reader) was written and tested before any
+lesson used a GENERIC class/interface as a supertype or return type, so
+none of it accounted for a `<...>` argument sitting where only a bare name
+was expected.
+
+1. **`where T : X, T : Y` multi-bound clauses corrupted the return type and
+   body.** `kotlinFunctions.ts`'s return-type reader has no concept of a
+   `where` clause, so it kept consuming tokens past it, gluing it onto the
+   return type with no whitespace (`StringwhereT:Named,T:Prioritized`) --
+   corrupt text that then failed to parse as either a type or a function
+   body. Fixed in `kotlinRunner.ts` by stripping `\bwhere\s+...` (up to the
+   next `=`/`{`) before any other transform runs.
+
+2. **`interface Logger<in T>{...}` itself failed to parse.**
+   `transpileInterfaceDeclarations`'s regex required the interface name to
+   be immediately followed by `{`, with no room for a generic type
+   parameter list. Fixed by allowing an optional `(?:<[^>{}]*>)?` between
+   the name and the brace.
+
+3. **A generic supertype broke both `class X : Interface<Arg>{...}` and
+   `object X : Interface<Arg>{...}`.** Neither `classRe` (class
+   declarations) nor the separate `objectInterfaces` capture regex (object
+   declarations) allowed a `<...>` after a supertype/interface name, so the
+   `<Arg>{...}` tail leaked through as raw, unparseable trailing text. Both
+   were fixed the same way (allowing an optional generic argument after
+   each supertype name), and the `interfaceNames` derivation also needed to
+   strip a trailing `<...>` in addition to the trailing `(...)` it already
+   stripped, so the interface-default-mixin/`__kt_implements_X` logic still
+   recognized the bare interface name underneath. **This retroactively
+   uncovered a real, previously undetected bug in World 11's own Boss
+   lesson** (`object UserFormatter:Formatter<User>{...}`) that had been
+   silently broken since it was written -- it was never caught by the
+   World 11 audit because that specific Explore card is labeled
+   `'Behavior'`, not `'Output'`, so it was never exact-execution-checked.
+   **Rule, reinforced:** a card without an exact-output check is not a card
+   that's been verified to run at all; run it anyway, the same as every
+   other card, even when nothing will diff its result.
+
+4. **`insertNewForInstantiation` also needed string-literal awareness for
+   an unrelated reason found in the same pass -- see the dedicated entry
+   above.**
+
+## World 12: generic type ARGUMENTS were never actually inferred, only accidentally guessed at via string shape
+
+`kotlinFunctions.ts`'s `readType()` builds a declared type's `.name` as the
+raw source text including any `<Arg>` (e.g. a `val b: Box<Int>` declaration
+reads as `.name = "Box<Int>"`), but a CONSTRUCTOR CALL's inferred type
+(`Box("seven")`) only ever resolved to the bare class name with no argument
+at all (`.name = "Box"`) -- there was no mechanism to infer what `T` had
+actually been instantiated as. This produced two different failures
+depending on which way the accidental string mismatch cut:
+
+- **False rejection:** `class MutableBox<T>(var value:T)` with
+  `val b: MutableBox<String> = MutableBox("draft")` -- a completely valid,
+  matching assignment -- was rejected as `Type mismatch: expected
+  MutableBox<String>, got MutableBox`, purely because the actual side never
+  carried its `<String>` argument at all.
+- **Accidental pass, for the wrong reason:** the existing Generic Classes
+  lesson's Predict question relies on `val b: Box<Int> = Box("seven")`
+  being flagged as a compile error -- and it was, but only because
+  `"Box<Int>"` happened to not equal the bare string `"Box"`, not because
+  the engine understood that a String was passed where an Int was
+  expected. A genuinely matching case in the same shape (`Box<String> =
+  Box("draft")`) would have hit the exact same false-rejection bug above
+  had anyone tried it before this audit.
+
+Fixed properly rather than patched around: added `classTypeParams` (a
+class name -> its own declared type parameter names, e.g. `Box` -> `['T']`)
+and fixed constructor registration to actually run for a GENERIC class
+(the pre-existing check `at(i + 2) === '('` never matched when a `<T>`
+clause came first, so `constructors` was silently empty for every generic
+class beforehand). Then, for the common case of a single type parameter
+whose constructor parameter is declared with that exact bare name, the
+constructor-call inference in `infer()` now looks up which constructor
+parameter position corresponds to `T` and infers the real argument type
+from the actual expression passed there, returning e.g. `{name:
+"Box<String>"}` for `Box("seven")` instead of a bare `{name: "Box"}`. This
+makes both cases above correct for the RIGHT reason: `MutableBox<String> =
+MutableBox("draft")` now compares `"MutableBox<String>"` against
+`"MutableBox<String>"` (match, correctly accepted), and `Box<Int> =
+Box("seven")` now compares `"Box<Int>"` against `"Box<String>"` (mismatch,
+correctly rejected with an honest error message naming the real inferred
+type, not a coincidental string collision).
+
+**Scope limit:** only single-type-parameter classes get this treatment
+(`Cell<K, V>` still falls back to the old bare-name behavior) -- extend
+`classTypeParams`/the inference lookup to multiple type parameters
+together only once a lesson actually needs it, verifying with
+`compileAndRunKotlin` the same way as everywhere else on this page.
+
+## World 12: a use-site variance annotation only stripped ONE side of a generic comparison, and a generic function's own type parameter names were hardcoded to only "T"/"R"
+
+Two related but separate bugs, both in `compatible()`/`readType()` in
+`kotlinFunctions.ts`:
+
+1. **`Array<in String>` (a function parameter's use-site-projected type)
+   correctly stripped down to a bare `"Array"` once `readType` recognized
+   the projection, but the ACTUAL argument passed at the call site (e.g.
+   `val a: Array<Any> = arrayOf(0)`, with no variance keyword of its own)
+   kept its full `"Array<Any>"` name -- so `compatible()` compared `"Array"`
+   against `"Array<Any>"` and still rejected a genuinely valid call.
+   Fixed by adding a narrow fallback in `compatible()`: when the two names
+   differ, also compare their BASE names (text before `<`) for a fixed set
+   of built-in generic collection types (`Array`, `List`, `MutableList`,
+   `Set`, `MutableSet`, `Map`, `MutableMap`, `Pair`) -- this engine has no
+   real generic-argument tracking for these built-ins anyway (unlike the
+   user-defined-class case, which deliberately keeps comparing full
+   bracketed names so a genuine mismatch like `Box<Int> = Box("seven")`
+   above still gets flagged for the right reason).
+
+2. **A generic function's own type parameter name was hardcoded.**
+   `compatible()` treated the literal names `"T"` and `"R"` as always
+   wildcard-compatible (since this engine has no real per-call-site generic
+   substitution), but `header()` never recorded a function's ACTUAL
+   declared type parameter names anywhere -- so a function declared as
+   `fun <A, B> transform(v: A, f: (A) -> B): B = f(v)` had its parameter
+   type `"A"` compared literally against a real argument's type (e.g.
+   `"Int"`) and always failed with a false `Type mismatch: expected A, got
+   Int`, even though the call was completely valid Kotlin. This had gone
+   unnoticed until World 12's Boss lesson, since every earlier generic
+   function in the curriculum happened to use the literal name `T`. Fixed
+   by having `header()` capture whatever type parameter names a function
+   actually declares (`fun <A, B, ...>`) into a shared
+   `genericTypeParamNames` set (seeded with `'T'`/`'R'` for backward
+   compatibility), and having `compatible()` consult that set instead of
+   the two hardcoded literals.
+
+**Rule, reinforced by both bugs above:** don't assume a generic mechanism
+"already works" just because it happens to work for the ONE letter every
+prior lesson used (`T`) or the ONE built-in every prior lesson happened to
+compare against a matching bracketed shape -- a hardcoded special case for
+a specific name/shape is a strong signal that the general case was never
+actually implemented. Test a lesson's own concrete class/type-parameter
+names, not a renamed copy of a previously-verified example.
+
+## World 12: a class body crammed onto one semicolon-joined line broke parsing again, in NEW lessons written after the rule already existed
+
+Two of World 12's lessons (Type-safe Generic APIs' `MemoryStore` and the
+World Boss's `DataStore`) were authored with exactly the semicolon-crammed
+single-line class body pattern the "Content rule: lesson code arrays must
+be properly formatted" entry above already documents as a known, standing
+authoring hazard (`class MemoryStore<T>{private val
+items=mutableListOf<T>();fun add(v:T){items.add(v)};fun
+first():T?=items.firstOrNull()}`) -- both failed with `Unexpected
+identifier 'items'` for exactly the reason already written down:
+`splitClassMembers` only recognizes a new member at the start of a
+physical line, so every member after the first on a `;`-joined line is
+invisible to it. Reformatting both across real lines (matching this file's
+own multi-line style) fixed both immediately, with zero other changes.
+
+**Rule, reinforced once more, because it was violated again just one world
+later:** this is not merely a style preference to clean up during review --
+treat any semicolon-joined multi-member one-liner in NEW content as a
+correctness bug to fix before ever running it, not just a readability nit
+to fix afterward. See `LESSON_QUALITY_STANDARD.md` section 4's formatting
+paragraph.
+
+## World 12: Star Projections (`List<*>`) silently dropped the WHOLE parameter, not just its type
+
+`cleanKotlinParams` (`kotlinRunner.ts`) strips a parameter's type annotation
+via a character class, `[a-zA-Z0-9_<>?.]+`, that never included `*`. Since
+the whole match is anchored (`^...$`), a type this class can't fully
+consume doesn't partially match -- the ENTIRE regex fails to match, so the
+parameter's NAME was silently dropped too, not just its type. A function
+like `fun describe(v: List<*>): String = "size=" + v.size` compiled to
+`function describe()` with no parameter at all, so `v` inside the body
+threw `v is not defined` -- a runtime error with no hint that the real
+cause was a type-annotation character, not a missing declaration. Fixed by
+adding `*` to the character class. One-character fix, but only found by
+actually running the code and reading past the misleading error message
+to the real cause, rather than assuming "not defined" meant an actually
+undeclared variable.
+
+## World 12: reified type parameters -- turning an erased `T` into a real runtime string argument instead of building true call-site inlining
+
+`inline fun <reified T> isType(value: Any): Boolean = value is T` has no
+direct JS equivalent: real Kotlin substitutes `T` with the actual type
+argument at every call site at compile time, which is the entire meaning
+of "reified." This engine has no per-call-site inlining/specialization
+mechanism, and building one (rewriting a function body per call site) was
+considered and rejected as disproportionate to what any lesson actually
+needs. Two separate, stacked failures existed before this was built:
+
+1. **The call site itself didn't parse.** `isType<String>("CodeDo")` (an
+   explicit type argument) isn't valid JS syntax -- with nothing to
+   recognize `<...>` as a type argument list, it silently parsed as a
+   chained comparison (`isType < String > ("CodeDo")`), throwing a
+   confusing `String is not defined` (or whatever type name was used) with
+   no connection to the real cause.
+2. **Even with a valid call, the body's `value is T` had no meaning.**
+   `T` isn't a real class, so the generic `is Type` fallback
+   (`transformTypeChecks`) emitted `(value) instanceof T`, throwing
+   `T is not defined` at runtime -- `T` was never bound to anything at all.
+
+Fixed with `transpileReifiedFunctions` (`kotlinRunner.ts`), a whole-source
+pre-pass run before `lowerKotlinFunctions`: it turns the reified type
+parameter into an ORDINARY runtime parameter carrying the type NAME as a
+plain string (`isType(value: Any, T: String)`), rewrites the body's
+`value is T` into a call to a new runtime helper, `__kt_isReifiedType(value,
+T)` (added alongside `__kt_notNull`/`__kt_equals` and threaded through the
+`new Function(...)` sandbox the same way), and rewrites every call site
+(`isType<String>(x)` -> `isType(x, "String")`) so the actual type name
+flows in as a real argument instead of being erased. `__kt_isReifiedType`
+implements the same typeof-based dispatch every other `is`/`as?` check in
+this file already uses -- Int/Long/Float/Double -> `typeof === 'number'`,
+String -> `'string'`, Boolean -> `'boolean'` -- and throws for anything
+else, since there is no runtime class registry keyed by a string name to
+support an arbitrary declared class, and Char is excluded for the
+established Char/String-indistinguishability reason repeated throughout
+this file.
+
+**Scope, deliberately narrow, matching this file's established
+single-line-header convention elsewhere:** the declaration itself
+(`inline fun <reified T> name(params): ReturnType = expr`, `inline` and
+the return type both optional) must be a single line ending in a
+single-expression body -- a block body (`{ ... }`) is not supported. Only
+one reified type parameter per function. A call site's explicit type
+argument must be a single bare type name, not a nested/qualified generic.
+None of World 12's actual lesson content needs anything wider; extend this
+narrowly, and re-verify with `compileAndRunKotlin`, if a future lesson
+actually requires a block-bodied reified function or more than one reified
+parameter.
